@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<title>API Capstone Project</title>
+		<link rel="stylesheet" type="text/css" href="main.css">
+		<link rel="stylesheet" type="text/css" href="float-grid.css">
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		<script
+			src="https://code.jquery.com/jquery-3.2.1.min.js"
+			integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+			crossorigin="anonymous">
+		</script>
+	</head>
+	<body>
+		<div class="background-shading" hidden></div> <!-- .background-shading -->			
+		<main>
+					<h1>API Capstone</h1>
+					<p class="js-no-such-location-error-message no-such-location-error-message"><br><br></p>
+					<form class="">
+						<input type="search"  name="search-box" class="js-search-box search-box" id="js-search-box" placeholder="Enter a location" required>
+						<select class="select-place-type js-select-place-type">
+							<option class="option-place-type js-option-place-type" value="art_gallery" selected="selected">Art Galleries</option>
+							<option class="option-place-type js-option-place-type" value="museum">Museums</option>
+							<option class="option-place-type js-option-place-type" value="restaurant">Restaurants</option>
+							<option class="option-place-type js-option-place-type" value="casino">Casinos</option>
+							<option class="option-place-type js-option-place-type" value="night_club">Night Clubs</option>
+							<option class="option-place-type js-option-place-type" value="bar">Bars</option>
+							<option class="option-place-type js-option-place-type" value="department_store">Department Stores</option>
+							<!-- My venue type categories below.  Unfortunately, Google's API only permits 
+									 one venue type for each search request... -->
+							<!--	Nightlife: night_club bar casino restaurant -->
+							<!-- Food: meal_takeaway restaurant bakery -->
+							<!-- Culture: aquarium art_gallery city_hall museum church hindu_temple synagogue -->
+							<!-- Coffee: cafe -->
+							<!-- Shopping: clothing_store department_store electronics_store jewelry_store shoe_store shopping_mall store -->
+						</select>
+						<br>
+						<button class="go-button js-go-button">Go!</button>
+						<br>
+					</form>
+					<button class="toggle-button js-toggle-button">Toggle<br>heatmap</button>
+		</main> <!-- row -->
+		<div class="js-map map" id="map"></div>	
+		<script src="index.js" type="text/javascript"></script>
+		<script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwrO9kTCuS6Zimy4p4zCZMa-UUsgJ_7OU&libraries=visualization,places&callback=initMap">  
+    </script>
+	</body>
+</html>
