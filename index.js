@@ -11,7 +11,7 @@ function listenForGoClick() {
       event.preventDefault();
       let locationString = $('.js-search-box').val(); // note that this line creates a jquery error when loaded from the index.html file from harddrive, but shouldn't once source code is hosted elsewhere.
       let placeType = $('.js-select-place-type :selected').text();
-      handleGoClick(locationString, placeType);
+      handleGoClick(locationString, placeType); 
     }
   });
 }
@@ -37,6 +37,9 @@ function handleGoClick(locationString, placeType) {
   console.log('handleGoClick');
   let geocodeUrl = makeGeocodeUrl(locationString);
   getAndCheckLocationJson(geocodeUrl);
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+  showResults();
 }
 
 // Makes the Url used in getAndCheckLocationJson().
