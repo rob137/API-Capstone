@@ -1,19 +1,40 @@
 'use strict';
 
-let map, heatmapLatLngsArr, heatmap;
+let map, heatmapLatLngsArr, heatmap, searchCount = 0;
+
+function startListeningForUserInput() {
+  console.log('startListeningForUserInput');
+  listenForGoClick();
+  listenForReturnOnSearch();
+  handleToggleHeatmapClick();
+}
 
 // Takes user input (location and place type) and calls handleGoClick.
 function listenForGoClick() {
   console.log('listenForGoClick');
   $('.js-go-button').on('click', function(event) {
     // Will only act if user has typed into the search box.
-    if ($('.js-search-box').val()) {
-      event.preventDefault();
-      let locationString = $('.js-search-box').val(); // note that this line creates a jquery error when loaded from the index.html file from harddrive, but shouldn't once source code is hosted elsewhere.
-      let placeType = $('.js-select-place-type :selected').text();
-      handleGoClick(locationString, placeType); 
-    }
+    initiateSearchFunctions();
   });
+}
+
+function listenForReturnOnSearch() {
+  console.log('listenForReturnOnSearch');
+  $('.js-search-box').keydown(function(event) {
+    if (event.which == 13) {
+      event.preventDefault()
+      initiateSearchFunctions();
+    }
+  })
+}
+
+function initiateSearchFunctions() {
+  console.log('initiateSearchFunctions');
+  if ($('.js-search-box').val()) {
+    let locationString = $('.js-search-box').val(); // note that this line creates a jquery error when loaded from the index.html file from harddrive, but shouldn't once source code is hosted elsewhere.
+    let placeType = $('.js-select-place-type :selected').text();
+    handleGoClick(locationString, placeType);
+  }
 }
 
 // Shows/hides heatmap layer
@@ -37,9 +58,6 @@ function handleGoClick(locationString, placeType) {
   console.log('handleGoClick');
   let geocodeUrl = makeGeocodeUrl(locationString);
   getAndCheckLocationJson(geocodeUrl);
-
-  // !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-  showResults();
 }
 
 // Makes the Url used in getAndCheckLocationJson().
@@ -148,11 +166,11 @@ function handleNewHeatmapRequest(locationObject, radius) {
 function makeLocationLatLngForPlacesRequest(locationObject) {
   console.log('makeLocationLatLngForPlacesRequest');
   let locationLatLng
-    // User can either query a search term by clicking Autocomplete suggestion,
-    // or by clicking 'go'.
-    // Autocomplete serves locationObject.geometry.location.lat/lng as functions 
-    // that return the lat/lng value.  Alternatively, when the user clicks 'go', 
-    // they are instead served numerical lat/lng values.  
+  // User can either query a search term by clicking Autocomplete suggestion,
+  // or by clicking 'go'.
+  // Autocomplete serves locationObject.geometry.location.lat/lng as functions 
+  // that return the lat/lng value.  Alternatively, when the user clicks 'go', 
+  // they are instead served numerical lat/lng values.  
   if (typeof locationObject.geometry.location.lat == 'function') {
     // For Autocomplete
     locationLatLng = {
@@ -199,11 +217,57 @@ function requestPlacesJson(locationLatLng, placeType, radius) {
     radius: radius,
     type: placeType
   }
-  service.nearbySearch(request, function(result) {
-    heatmapLatLngsArr = makeLatLngsFromPlacesJson(result);
+  service.nearbySearch(request, function(results) {
+    heatmapLatLngsArr = makeLatLngsFromPlacesJson(results);
     createHeatmap(heatmapLatLngsArr);
+    if (searchCount > 0) {
+      showResultsInSidebar(results);
+    }
+    searchCount++
   });
 }
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+function showResultsInSidebar(results) {
+  console.log('showResultsInSidebar');
+  let placeName, placeType, placeLocation, placeDescription, placeImage;
+  revealResultsArea();
+  prepareResultsHtmlFromResults(results);
+  displayResultsHtml();
+}
+
+function revealResultsArea() {
+  console.log('revealResultsArea');
+  $('.results-area').removeAttr('hidden');
+}
+
+
+function prepareResultsHtmlFromResults() {
+  console.log('prepareResultsHtmlFromResults');
+  let html = ``;
+  for (place in results) {
+    html += `
+    `
+  }
+}
+
+function displayResultsHtml() {
+  console.log('displayResultsHtml');
+}
+
+
 
 // creates lat/lngs object in the format accepted by the API.
 function makeLatLngsFromPlacesJson(json) {
@@ -281,7 +345,7 @@ function initMap() {
       position: google.maps.ControlPosition.BOTTOM_LEFT,
     }
   });
-  
+
 
   // Add autocomplete functionality to searchbar.
   prepareAutocomplete()
@@ -289,9 +353,7 @@ function initMap() {
   handleNewHeatmapRequest(startLatLng);
 }
 $('.js-search-box').focus()
-listenForGoClick();
-handleToggleHeatmapClick();
-
+startListeningForUserInput();
 
 
 
