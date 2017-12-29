@@ -103,7 +103,7 @@ function checkProposedLocationIsValid(locationJson) {
 function displayNoSuchLocationErrorMessage() {
   console.log('displayNoSuchLocationErrorMessage');
   let noSuchLocationErrorMessage = `Sorry, that location isn't available. <br> Please try another.`;
-  $('.js-no-such-location-error-message').html(noSuchLocationErrorMessage)
+  $('.js-no-such-location-error-message').html(noSuchLocationErrorMessage).removeAttr('hidden');
 }
 // When the user submits a valid location.
 function removeNoSuchLocationErrorMessage() {
@@ -239,13 +239,12 @@ function requestPlacesJson(locationLatLng, placeType, radius) {
 // !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-
 function showResultsInSidebar(results) {
   console.log('showResultsInSidebar');
-  let placeName, placeType, placeLocation, placeDescription, placeImage;
   revealResultsArea();
-  prepareResultsHtmlFromResults(results);
-  displayResultsHtml();
+  let resultsHtml = prepareResultsHtmlFromResults(results);
+  displayResultsHtml(resultsHtml);
+  listenForToggleShowResultsButtonClick();
 }
 
 function revealResultsArea() {
@@ -254,20 +253,63 @@ function revealResultsArea() {
 }
 
 
-function prepareResultsHtmlFromResults() {
+function prepareResultsHtmlFromResults(results) {
   console.log('prepareResultsHtmlFromResults');
-  let html = ``;
-  for (place in results) {
-    html += `
-    `
+  let attractionName, attractionLocation, attractionPhoto;
+  let html = `<div class="results-initial-margin">
+                <p>Results on the heatmap:</p>
+              </div>
+              <hr>`;
+  for (let attraction in results) {
+    let thisAttraction = results[attraction];
+    attractionName = thisAttraction.name;
+    attractionLocation = thisAttraction.vicinity;
+    attractionPhoto = makeAttractionPhotoHtml(thisAttraction);
+    html +=
+      `<section class="attraction-individual-area">
+              <img class="attraction-image" src="${attractionPhoto}" alt="${attractionName}">
+              <h3>${attractionName}</h3>
+              <p>${attractionLocation}</p>
+            </section>
+            <hr>
+            `
+  }
+  return html;
+}
+
+function makeAttractionPhotoHtml(thisAttraction) {
+  if (thisAttraction.photos) {
+    return thisAttraction.photos[0].getUrl({
+      maxWidth: 150
+    });
+  } else {
+    return 'https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg';
   }
 }
 
-function displayResultsHtml() {
+function displayResultsHtml(resultsHtml) {
   console.log('displayResultsHtml');
+  $('.results-area').html(resultsHtml)
 }
 
+function listenForToggleShowResultsButtonClick() {
+  console.log('listenForToggleShowResultsButtonClick');
+  $('.js-toggle-show-results-button').on('click', function(event) {
+    console.log(1);
+    if ($(event.target).hasClass('hide-button')) {
+      $(event.target).removeClass('hide-button')
+        .addClass('show-button')
+        .html('keyboard_arrow_right');
+      $('.results-area').attr('hidden', 'true');
+    } else {
+      $(event.target).removeClass('show-button')
+        .addClass('hide-button')
+        .html('keyboard_arrow_left');
+      $('.results-area').removeAttr('hidden');
 
+    }
+  })
+}
 
 // creates lat/lngs object in the format accepted by the API.
 function makeLatLngsFromPlacesJson(json) {
@@ -291,7 +333,7 @@ function createHeatmap(heatmapLatLngsArr) {
     heatmap = new google.maps.visualization.HeatmapLayer({
       data: heatmapLatLngsArr,
       map: map,
-      radius: 50,
+      radius: 70,
       opacity: 0.5
     });
   } else {
@@ -336,6 +378,9 @@ function initMap() {
     lat: 51.5032,
     lng: -0.1123
   };
+
+
+
   // Create Google Map centered on startLatLng. 
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
@@ -346,12 +391,20 @@ function initMap() {
     }
   });
 
-
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      let me = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+      map.setCenter(me);
+      handleNewHeatmapRequest(me);
+    }, function(error) {
+      map.setCenter(startLatLng);
+      handleNewHeatmapRequest(startLatLng);
+    });
+  }
   // Add autocomplete functionality to searchbar.
   prepareAutocomplete()
-  // Create heatmap layer for initial map position.
-  handleNewHeatmapRequest(startLatLng);
 }
+
 $('.js-search-box').focus()
 startListeningForUserInput();
 
