@@ -1,7 +1,8 @@
 'use strict';
 
-let map, heatmapLatLngsArr, heatmap;
-// Initial lat/lng for pageload
+let map, heatmapLatLngsArr, heatmap, userPosition, userLocationLatLngObject;
+
+// Initial lat/lng for pageload (if app can't geolocate user)
 let defaultLatLng = {
   lat: 51.5032,
   lng: -0.1123
@@ -39,15 +40,15 @@ function initiateSearchFunctions() {
   if ($('.js-search-box').val()) {
     let locationString = $('.js-search-box').val(); // note that this line creates a jquery error when loaded from the index.html file from harddrive, but shouldn't once source code is hosted elsewhere.
     let placeType = $('.js-select-place-type :selected').text();
-    handleGoClick(locationString, placeType);
+    handleUserSearchRequest(locationString, placeType);
   }
 }
 
 // Starts the chain of functions.
 // Note that many of the other functions are set off by checkProposedLocationIsValid.
 // This is due to the wait time for the Geocode JSON request.
-function handleGoClick(locationString, placeType) {
-  console.log('handleGoClick');
+function handleUserSearchRequest(locationString, placeType) {
+  console.log('handleUserSearchRequest');
   let geocodeUrl = makeGeocodeUrl(locationString);
   getAndCheckLocationJson(geocodeUrl);
 }
@@ -217,7 +218,7 @@ function requestPlacesJson(locationLatLng, placeType, radius) {
 }
 
 function showResultsInSidebar(results) {
-  console.log('showResultsInSidebar');  
+  console.log('showResultsInSidebar');
   let resultsHtml = prepareResultsHtmlFromResults(results);
   displayResultsHtml(resultsHtml);
   initialRevealResultsArea();
@@ -245,7 +246,7 @@ function prepareResultsHtmlFromResults(results) {
     attractionName = thisAttraction.name;
     attractionLocation = thisAttraction.vicinity;
     attractionPhoto = makeAttractionPhotoHtml(thisAttraction);
-    attractionId = 'Hiii'
+    attractionId = thisAttraction.id;
     html +=
       `<section class="attraction-individual-area" attractionid="${attractionId}">
               <img class="attraction-image" src="${attractionPhoto}" alt="${attractionName}">
@@ -373,7 +374,7 @@ function initMap() {
       position: google.maps.ControlPosition.BOTTOM_LEFT,
     }
   });
-  
+
   // for pageload:
   performInitialHeatmapSearch();
 
@@ -384,36 +385,48 @@ function initMap() {
 // Either perform initial search on user's location, or use
 // a central London to present an example search.
 function performInitialHeatmapSearch() {
-  console.log('performInitialHeatmapSearch');  
-  let userLocationLatLngObject;
-  console.log(userLocationLatLngObject);
-  navigator.geolocation.getCurrentPosition(function(pos) {
+  console.log('performInitialHeatmapSearch');
+  navigator.geolocation.getCurrentPosition(function(userPosition) {
     userLocationLatLngObject = {
-      lat: pos.coords.latitude,
-      lng: pos.coords.longitude
-     };
-    showLocation(userLocationLatLngObject);
-    centerOnUserLocation(pos);
-    
+      lat: userPosition.coords.latitude,
+      lng: userPosition.coords.longitude
+    };
+    showUserLocation();
+    centerOnUserLocation(userPosition);
   }, function(error) {
-      // If the user's location isn't available:
+    // If the user's location isn't available:
     centerOnDefaultLocation();
-  });  
+  });
 }
 
-function centerOnUserLocation(pos) {
+function centerOnUserLocation(userPosition) {
   console.log('centerOnUserLocation');
-  let userLocation = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+  let userLocation = new google.maps.LatLng(userPosition.coords.latitude, userPosition.coords.longitude);
   map.setCenter(userLocation);
-  handleNewHeatmapRequest(userLocation); 
+  handleNewHeatmapRequest(userLocation);
 }
 
-function showLocation(latLngObject) {
+function showUserLocation() {
   console.log('showLocation');
   let infoWindow = new google.maps.InfoWindow;
-  infoWindow.setPosition(latLngObject);
+  let radius = getRadiusForPlacesRequest() / 45;
+
+  // Shows label pointing to user location:
+  infoWindow.setPosition(userLocationLatLngObject);
   infoWindow.setContent('You!');
   infoWindow.open(map);
+
+  // Shows circle on user location:
+  new google.maps.Circle({
+    strokeColor: '#F48024',
+    strokeOpacity: 1,
+    strokeWeight: 1,
+    fillColor: '#1179F4',
+    fillOpacity: 0.35,
+    map: map,
+    center: userLocationLatLngObject,
+    radius: radius
+  });
 }
 
 function centerOnDefaultLocation() {
