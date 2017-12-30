@@ -16,7 +16,11 @@
 					<h1>Heatmap Search</h1>
 					<form>
 						<select class="select-place-type js-select-place-type">
-							<option class="option-place-type js-option-place-type" value="restaurant" selected="selected">Restaurants</option>
+							<option class="option-place-type js-option-place-type collection" value="city_hall,church,synagogue,mosque,hindu_temple,library,museum,art_gallery">Culture</option>
+							<option class="option-place-type js-option-place-type collection" value="restaurant,bar,night_club,casino">Nightlife</option>
+							<option class="option-place-type js-option-place-type collection" value="movie_theater,bowling_alley,aquarium,park">Entertainment</option>
+							<option class="option-place-type js-option-place-type collection" value="meal_takeaway,bakery,restaurant">Food</option>
+							<option class="option-place-type js-option-place-type collection" value="restaurant,cafe,restaurant" selected='selected'>Restaurants</option>
 							<option class="option-place-type js-option-place-type" value="art_gallery">Art Galleries</option>
 							<option class="option-place-type js-option-place-type" value="museum">Museums</option>
 							<option class="option-place-type js-option-place-type" value="casino">Casinos</option>
@@ -24,13 +28,7 @@
 							<option class="option-place-type js-option-place-type" value="bar">Bars</option>
 							<option class="option-place-type js-option-place-type" value="department_store">Department Stores</option>
 							<option class="option-place-type js-option-place-type" value="cafe">Cafes</option>
-							<!-- My venue tyep categories below.  Unfortunately, Google's API only permits
-							one venue type for each search request... -->
-							<!-- Nightlife: night_club bar casino restaurant -->
-							<!-- Food: meal_takeaway restaurant bakery -->
-							<!-- Culture: aquarium art_gallery city_hall museum church hindu_temple synagogue -->
-							<!-- Coffee: cafe -->
-							<!-- Shopping: clothing_store department_store electronics_store jewelry_store shoe_store shopping_mall store -->
+							<option class="option-place-type js-option-place-type" value="store">Shops (all)</option>
 						</select>
 						<input type="search"  name="search-box" class="js-search-box search-box" id="js-search-box" placeholder="Enter an address" required><i class="material-icons search-icon js-search-icon go-button js-go-button" alt="search_icon">search</i>
 					</form>
