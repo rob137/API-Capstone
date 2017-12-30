@@ -1,6 +1,12 @@
 'use strict';
 
 let map, heatmapLatLngsArr, heatmap;
+// Initial lat/lng for pageload
+let startLatLng = {
+  lat: 51.5032,
+  lng: -0.1123
+};
+
 
 function startListeningForUserInput() {
   console.log('startListeningForUserInput');
@@ -240,7 +246,7 @@ function prepareResultsHtmlFromResults(results) {
     attractionName = thisAttraction.name;
     attractionLocation = thisAttraction.vicinity;
     attractionPhoto = makeAttractionPhotoHtml(thisAttraction);
-    attractionId = ''
+    attractionId = 'Hiii'
     html +=
       `<section class="attraction-individual-area" attractionid="${attractionId}">
               <img class="attraction-image" src="${attractionPhoto}" alt="${attractionName}">
@@ -359,14 +365,6 @@ function prepareAutocomplete() {
 // initial map/heatmap and calls prepareAutocomplete().  
 function initMap() {
   console.log('initMap');
-  // Initial lat/lng for pageload
-  let startLatLng = {
-    lat: 51.5032,
-    lng: -0.1123
-  };
-
-
-
   // Create Google Map centered on startLatLng. 
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
@@ -376,19 +374,34 @@ function initMap() {
       position: google.maps.ControlPosition.BOTTOM_LEFT,
     }
   });
+  
+  // for pageload:
+  performInitialHeatmapSearch();
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      let me = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-      map.setCenter(me);
-      handleNewHeatmapRequest(me);
-    }, function(error) {
-      map.setCenter(startLatLng);
-      handleNewHeatmapRequest(startLatLng);
-    });
-  }
   // Add autocomplete functionality to searchbar.
   prepareAutocomplete()
+}
+
+// Either perform initial search on user's location, or use
+// a central London to present an example search.
+function performInitialHeatmapSearch() {  
+  navigator.geolocation.getCurrentPosition(function(pos) {
+      showUserLocation(pos)
+    }, function(error) {
+      // If the user's location isn't available:
+      showDefaultLocation();
+    });  
+}
+
+function showUserLocation(pos) {
+  let me = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+  map.setCenter(me);
+  handleNewHeatmapRequest(me);
+}
+
+function showDefaultLocation() {
+  map.setCenter(startLatLng);
+  handleNewHeatmapRequest(startLatLng);
 }
 
 $('.js-search-box').focus()
