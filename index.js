@@ -2,7 +2,7 @@
 
 let map, heatmapLatLngsArr, heatmap;
 // Initial lat/lng for pageload
-let startLatLng = {
+let defaultLatLng = {
   lat: 51.5032,
   lng: -0.1123
 };
@@ -230,8 +230,7 @@ function initialRevealResultsArea() {
     .removeClass('hidden')
     .removeClass('show-button')
     .addClass('hide-button')
-    .html('keyboard_arrow_left')
-    console.log(1);
+    .html('keyboard_arrow_left');
 }
 
 function prepareResultsHtmlFromResults(results) {
@@ -365,10 +364,10 @@ function prepareAutocomplete() {
 // initial map/heatmap and calls prepareAutocomplete().  
 function initMap() {
   console.log('initMap');
-  // Create Google Map centered on startLatLng. 
+  // Create Google Map centered on defaultLatLng. 
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
-    center: startLatLng,
+    center: defaultLatLng,
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
       position: google.maps.ControlPosition.BOTTOM_LEFT,
@@ -384,24 +383,43 @@ function initMap() {
 
 // Either perform initial search on user's location, or use
 // a central London to present an example search.
-function performInitialHeatmapSearch() {  
+function performInitialHeatmapSearch() {
+  console.log('performInitialHeatmapSearch');  
+  let userLocationLatLngObject;
+  console.log(userLocationLatLngObject);
   navigator.geolocation.getCurrentPosition(function(pos) {
-      showUserLocation(pos)
-    }, function(error) {
+    userLocationLatLngObject = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude
+     };
+    showLocation(userLocationLatLngObject);
+    centerOnUserLocation(pos);
+    
+  }, function(error) {
       // If the user's location isn't available:
-      showDefaultLocation();
-    });  
+    centerOnDefaultLocation();
+  });  
 }
 
-function showUserLocation(pos) {
-  let me = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-  map.setCenter(me);
-  handleNewHeatmapRequest(me);
+function centerOnUserLocation(pos) {
+  console.log('centerOnUserLocation');
+  let userLocation = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+  map.setCenter(userLocation);
+  handleNewHeatmapRequest(userLocation); 
 }
 
-function showDefaultLocation() {
-  map.setCenter(startLatLng);
-  handleNewHeatmapRequest(startLatLng);
+function showLocation(latLngObject) {
+  console.log('showLocation');
+  let infoWindow = new google.maps.InfoWindow;
+  infoWindow.setPosition(latLngObject);
+  infoWindow.setContent('You!');
+  infoWindow.open(map);
+}
+
+function centerOnDefaultLocation() {
+  console.log('centerOnDefsaultLocation');
+  map.setCenter(defaultLatLng);
+  handleNewHeatmapRequest(defaultLatLng);
 }
 
 $('.js-search-box').focus()
