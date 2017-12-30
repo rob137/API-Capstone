@@ -1,6 +1,6 @@
 'use strict';
 
-let map, heatmapLatLngsArr, heatmap, userPosition, userLocationLatLngObject;
+let map, heatmapLatLngsArr, heatmap, userPosition, userLocationLatLngObject, placesJson, marker;
 
 // Initial lat/lng for pageload (if app can't geolocate user)
 let defaultLatLng = {
@@ -14,6 +14,7 @@ function startListeningForUserInput() {
   listenForGoClick();
   listenForReturnOnSearch();
   listenForToggleShowResultsButtonClick();
+  listenForUserClickOnResults();
 }
 
 // Takes user input (location and place type) and calls handleGoClick.
@@ -84,6 +85,7 @@ function checkProposedLocationIsValid(locationJson) {
     // In case the error message is already displayed
     removeNoSuchLocationErrorMessage();
     let locationObject = locationJson.results[0];
+
     // Center the map
     goToLocation(locationObject);
     handleNewHeatmapRequest(locationObject);
@@ -133,26 +135,34 @@ function setMapViewportUsingCenterPoint(locationJson) {
 }
 
 // Calls Google Places API GET request and then calls for heatmap generation 
-function handleNewHeatmapRequest(locationObject, radius) {
+function handleNewHeatmapRequest(locationObject) {
   console.log('handleNewHeatmapRequest');
-  let locationLatLng;
+  let locationLatLng, radius;
   if (locationObject.geometry) {
     locationLatLng = makeLocationLatLngForPlacesRequest(locationObject);
   } else {
     locationLatLng = locationObject;
   }
   let placeType = $('option:selected').val();
-
-  if (!locationObject.geometry) {
-    // For example displayed on initial pageload.  Loads slowly, causing
-    // potential flow control issues.  Therefore is manually assigned here. 
-    radius = 2000;
-  } else {
-    // For all subsequent searches. 
-    radius = getRadiusForPlacesRequest();
-  }
+  radius = getviewportRadius();
   requestPlacesJson(locationLatLng, placeType, radius);
   createHeatmap();
+}
+
+// Sets radius to a quarter of the current viewport size - to ensure 
+// that the search area is appropriate for the user's perspective.
+function getviewportRadius() {
+  let northEastBoundLatLngObject = {
+    lat: map.getBounds().getNorthEast().lat,
+    lng: map.getBounds().getNorthEast().lng
+  }
+  let southWestBoundLatLngObject = {
+    lat: map.getBounds().getSouthWest().lat,
+    lng: map.getBounds().getSouthWest().lng
+  }
+  let radius = google.maps.geometry.spherical
+    .computeDistanceBetween(northEastBoundLatLngObject, southWestBoundLatLngObject) / 4;
+  return radius
 }
 
 // Creates the right object format for location requests to Google's API 
@@ -166,18 +176,39 @@ function makeLocationLatLngForPlacesRequest(locationObject) {
   // they are instead served numerical lat/lng values.  
   if (typeof locationObject.geometry.location.lat == 'function') {
     // For Autocomplete
-    locationLatLng = {
-      lat: locationObject.geometry.location.lat(),
-      lng: locationObject.geometry.location.lng()
-    }
+    locationLatLng = makeLatLngObject(locationObject);
   } else {
     // For user clicking 'go'
-    locationLatLng = {
-      lat: locationObject.geometry.location.lat,
-      lng: locationObject.geometry.location.lng
-    }
+    locationLatLng = makeLatLngObject(locationObject);
+    return locationLatLng;
   }
-  return locationLatLng;
+}
+
+// Returns lat/lng in format that can be used with Google Maps.
+// There are several ways that Google's APIs present lat/lng data.
+// This function handles them or displays an error message.
+function makeLatLngObject(source) {
+  console.log('makeLatLngObject');
+  let latLngObject;
+  if (source.geometry && typeof source.geometry.location.lat == 'function') {
+    latLngObject = {
+      lat: source.geometry.location.lat(),
+      lng: source.geometry.location.lng()
+    }
+  } else if (source.geometry) {
+    latLngObject = {
+      lat: source.geometry.location.lat,
+      lng: source.geometry.location.lng
+    }
+  } else if (source.coords) {
+    latLngObject = {
+      lat: source.coords.latitude,
+      lng: source.coords.longitude
+    }
+  } else {
+    console.log('Error - unrecognised lat/lng source type');
+  }
+  return latLngObject
 }
 
 // Ensures heatmap results are drawn from visible map. 
@@ -204,6 +235,7 @@ function getRadiusForPlacesRequest() {
 // Requests places and makes a heatmapArr for createHeatmap().
 function requestPlacesJson(locationLatLng, placeType, radius) {
   console.log('requestPlacesJson');
+  console.log(radius);
   let service = new google.maps.places.PlacesService(map);
   let request = {
     location: locationLatLng,
@@ -214,6 +246,7 @@ function requestPlacesJson(locationLatLng, placeType, radius) {
     heatmapLatLngsArr = makeLatLngsFromPlacesJson(results);
     createHeatmap(heatmapLatLngsArr);
     showResultsInSidebar(results);
+    placesJson = results;
   })
 }
 
@@ -271,7 +304,28 @@ function makeAttractionPhotoHtml(thisAttraction) {
 
 function displayResultsHtml(resultsHtml) {
   console.log('displayResultsHtml');
-  $('.results-area').html(resultsHtml)
+  $('.results-area').html(resultsHtml);
+}
+
+
+function listenForUserClickOnResults() {
+  $('.results-area').on('click', '.attraction-individual-area', function(event) {
+    let thisAttractionId, thisAttractionObject, thisAttractionLatLngObject;
+    thisAttractionId = $(event.target).closest('section').attr('attractionid');
+    thisAttractionObject = placesJson.filter(function(obj) {
+      return obj.id == thisAttractionId;
+    })[0];
+    if (marker) {
+      marker.setMap(null)
+    }
+    thisAttractionLatLngObject = makeLatLngObject(thisAttractionObject);
+    centerMapOnLocation(thisAttractionLatLngObject);
+    marker = new google.maps.Marker({
+      position: thisAttractionLatLngObject,
+      map: map,
+      title: 'Hello World!'
+    });
+  });
 }
 
 function listenForToggleShowResultsButtonClick() {
@@ -338,6 +392,45 @@ function createHeatmap(heatmapLatLngsArr) {
   }
 }
 
+// Called when Google API finishes loading.  Kickstarts the page with
+// initial map/heatmap and calls prepareAutocomplete().  
+function initMap() {
+  console.log('initMap');
+  // Create Google Map centered on defaultLatLng. 
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 15,
+    center: defaultLatLng,
+    mapTypeControlOptions: {
+      style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+      position: google.maps.ControlPosition.BOTTOM_LEFT,
+    }
+  });
+
+  // for pageload:
+  performInitialHeatmapSearch();
+
+  // Add autocomplete functionality to searchbar.
+  prepareAutocomplete();
+
+  // Add 'search around a clicked spot on the map' functionality 
+  prepareSearchOnClickToMap();
+}
+
+// Either perform initial search on user's location, or use
+// a central London to present an example search.
+function performInitialHeatmapSearch() {
+  console.log('performInitialHeatmapSearch');
+  navigator.geolocation.getCurrentPosition(function(userPosition) {
+    userLocationLatLngObject = makeLatLngObject(userPosition);
+    showUserLocation();
+    centerOnUserLocation(userPosition, userLocationLatLngObject);
+  }, function(error) {
+    // If the user's location isn't available:
+    centerMapOnLocation(defaultLatLng);
+    handleNewHeatmapRequest(defaultLatLng);
+  });
+}
+
 // Adds autocomplete functionality to search bar.
 // Called when Google Maps API is finished loading (see initMap, below).
 function prepareAutocomplete() {
@@ -350,71 +443,51 @@ function prepareAutocomplete() {
   autocomplete.bindTo('bounds', map);
   autocomplete.addListener('place_changed', function() {
     let place = autocomplete.getPlace();
+    let placeLatLngObj = makeLatLngObject(place);
     if (place.geometry.viewport) {
+      console.log('centering with viewport');
       // uses viewport coords (if place object has them) to bound map.
       map.fitBounds(place.geometry.viewport);
     } else {
+      console.log('centering with central point');
       // else just center on the location
-      map.setCenter(place.geometry.location);
+      centerMapOnLocation(placeLatLngObj);
     }
+    handleNewHeatmapRequest(placeLatLngObj);
   });
 }
 
-
-// Called when Google API finishes loading.  Kickstarts the page with
-// initial map/heatmap and calls prepareAutocomplete().  
-function initMap() {
-  console.log('initMap');
-  // Create Google Map centered on defaultLatLng. 
-  map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 13,
-    center: defaultLatLng,
-    mapTypeControlOptions: {
-      style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-      position: google.maps.ControlPosition.BOTTOM_LEFT,
+function prepareSearchOnClickToMap() {
+  google.maps.event.addListener(map, 'click', function(event) {
+    let clickedLatLngObject = {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng()
     }
-  });
-
-  // for pageload:
-  performInitialHeatmapSearch();
-
-  // Add autocomplete functionality to searchbar.
-  prepareAutocomplete()
-}
-
-// Either perform initial search on user's location, or use
-// a central London to present an example search.
-function performInitialHeatmapSearch() {
-  console.log('performInitialHeatmapSearch');
-  navigator.geolocation.getCurrentPosition(function(userPosition) {
-    userLocationLatLngObject = {
-      lat: userPosition.coords.latitude,
-      lng: userPosition.coords.longitude
-    };
-    showUserLocation();
-    centerOnUserLocation(userPosition);
-  }, function(error) {
-    // If the user's location isn't available:
-    centerOnDefaultLocation();
+    handleNewHeatmapRequest(clickedLatLngObject);
   });
 }
 
+// Centers viewport to user's position. 
 function centerOnUserLocation(userPosition) {
   console.log('centerOnUserLocation');
-  let userLocation = new google.maps.LatLng(userPosition.coords.latitude, userPosition.coords.longitude);
-  map.setCenter(userLocation);
-  handleNewHeatmapRequest(userLocation);
+  userLocationLatLngObject = new google.maps.LatLng(userPosition.coords.latitude, userPosition.coords.longitude);
+  centerMapOnLocation(userLocationLatLngObject);
+  handleNewHeatmapRequest(userLocationLatLngObject);
 }
 
+// Marks user location with circle and temporary label.
 function showUserLocation() {
   console.log('showLocation');
   let infoWindow = new google.maps.InfoWindow;
   let radius = getRadiusForPlacesRequest() / 45;
 
-  // Shows label pointing to user location:
+  // Shows label pointing to user location for 3 seconds:
   infoWindow.setPosition(userLocationLatLngObject);
-  infoWindow.setContent('You!');
+  infoWindow.setContent("You!");
   infoWindow.open(map);
+  setTimeout(function() {
+    infoWindow.close();
+  }, 3000);
 
   // Shows circle on user location:
   new google.maps.Circle({
@@ -429,11 +502,12 @@ function showUserLocation() {
   });
 }
 
-function centerOnDefaultLocation() {
-  console.log('centerOnDefsaultLocation');
-  map.setCenter(defaultLatLng);
-  handleNewHeatmapRequest(defaultLatLng);
+
+function centerMapOnLocation(latLngObject) {
+  console.log('centerOnLocation');
+  map.setCenter(latLngObject);
 }
+
 
 $('.js-search-box').focus()
 startListeningForUserInput();
