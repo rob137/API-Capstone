@@ -1,7 +1,11 @@
 body {
 	box-sizing: border-box;
 	font-family: roboto;
-	z-index: -5;
+	z-index: -100;
+}
+
+p h2 h3 {
+	color: #382D5E
 }
 
 .search-area {
@@ -9,8 +13,10 @@ body {
 	left: 0;
 	position: fixed;
 	width: 100%;
-	height: 15vh;
-	background-color: white;
+	height: 110px;
+	border-bottom: 3px white solid;
+	background-color: #FAFAFB;
+	z-index: 3;
 }
 
 form {
@@ -20,6 +26,7 @@ form {
 }
 
 h1 {
+	color: #372D3B;
 	line-height: 0;
 	padding-top: 10px;
 	padding-bottom: 0;
@@ -34,91 +41,96 @@ h1 {
 	left: 60%;
 }
 
-input, .toggle-button {
+hr {
+	border-top: 1px #DBDBDB solid;
+}
+
+input {
 	font-size: 0.8em;
-	border-radius: 0.6vh;
+	border: 1px #1179F4 solid;
+	width: 48%;
+	padding-left: 5px;
+	background-color: white;
 }
 
 input, .select-place-type {
 	position: relative;
 	height: 2.5em;
-}
-
-input {
-	width: 48%;
-	padding-left: 5px;
+	top: 2px;
+	border-radius: 0.6vh;
 }
 
 .select-place-type {
 	width: 48%;
+	background-color: white;
+	border: 1px #F48024 solid;
 }
 
 .search-icon {
-	position: relative;
-	margin: 0 auto;
-	top: 7.5px;
-	z-index: 1;
-	width: 3%;
-	left: 4px;
+	position: fixed;
+	top: 65px;
+	right: 30px;
 	cursor: pointer;
-	background-color: white;
-}
-
-
-.toggle-button {
-	position: relative;
-	left: -0.14em;
-	top: 10px;
+	background-color: #FAFAFB;
 }
 
 .no-such-location-error-message {
 	font-size: 0.8em;
 }
 
-
+.hidden {
+	visibility: hidden;
+}
 
 .results-area {
+	display: inline-block;
 	z-index: -1;
-	background-color: grey;
+	background-color: white;
 	position: fixed;
-	width: 440px;
+	width: 350px;
 	height: 85vh;
 	margin: 0 auto;
-	top: 15vh;
+	top: 110px;
 	left: 0;
 	overflow-y: auto;
+	border-right: 3px solid white;
+	z-index: 1;
+}
+
+.map {
+	top: 105px;
+	height: 85vh;
+	width: 100%;
+	position: fixed;
 }
 
 .toggle-show-results-button {
-	z-index: 1;
 	cursor: pointer;
-	border: 8px solid cyan;
+	border: 8px solid #DA6161;
 	border-radius: 100px;
 	position: fixed;
 	color: black;
 	background-color: white;
+	z-index: 2;
+	top: 300px;
+	box-shadow: 1px 0.5px grey;
 }
 
 .hide-button {
-	left: 413px;
-	top: 50%;
-
+	left: 320px;
 }
 
 .show-button {
 	left: -18px;
-	top: 50%;
-
 }
 
 .results-initial-margin {
-	height: 80px;
+	height: 4vh;
 	text-align: center;
 }
 
 .results-initial-margin p {
 	position: relative;
-	top: 60%;
 	vertical-align: center;
 }
 
@@ -142,36 +154,6 @@ input {
 	float: right;
 }
 
-.presearch {
-	position: fixed;
-	text-align: center;
-	float: left;
-	margin: -0.5em;
-	border: 1px solid black;
-
-	max-width: 450px;
-	height: 0em;
-}
-
-.postsearch {
-	position: fixed;
-	text-align: center;
-	float: left;
-	background: white;
-	border: 1px solid black;
-	max-width: 450px;
-	height: 100%;
-}
-
-.map {
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100vh;
-	width: 100vw;
-	margin: 0 auto;
-	z-index: -2;
-}
 
 
 @media (max-width: 750px) { 
@@ -215,36 +197,3 @@ input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration { 
 	display: none; 
 }
-
-
-/* Remove below this line? 
-.background-shading {
-	position: fixed;
-	background-color: grey;
-	opacity: 0.8;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	z-index: 0;
-}
-
-.place-type-buttons {
-	display: flex;
-	justify-content: center;
-	margin: 14vh 5% 0 5%;
-	list-style: none;
-	padding: 0; 
-}
-
-.place-type-buttons button {
-	position: relative;
-	text-align: center;
-	width: 12vw;
-	height: 6vh;
-	min-height: 20px;
-	font-size: 2vh;
-	z-index: 1;
-	padding: 0;
-}
-*/

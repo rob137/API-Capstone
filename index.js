@@ -1,12 +1,12 @@
 'use strict';
 
-let map, heatmapLatLngsArr, heatmap, searchCount = 0;
+let map, heatmapLatLngsArr, heatmap;
 
 function startListeningForUserInput() {
   console.log('startListeningForUserInput');
   listenForGoClick();
   listenForReturnOnSearch();
-  handleToggleHeatmapClick();
+  listenForToggleShowResultsButtonClick();
 }
 
 // Takes user input (location and place type) and calls handleGoClick.
@@ -35,20 +35,6 @@ function initiateSearchFunctions() {
     let placeType = $('.js-select-place-type :selected').text();
     handleGoClick(locationString, placeType);
   }
-}
-
-// Shows/hides heatmap layer
-function handleToggleHeatmapClick() {
-  $('.js-toggle-button').on('click', function(event) {
-    event.preventDefault();
-    if (heatmap.map) {
-      // hides the heatmap layer
-      heatmap.setMap(null);
-    } else {
-      // shows the heatmap layer
-      heatmap.setMap(map);
-    }
-  });
 }
 
 // Starts the chain of functions.
@@ -126,7 +112,7 @@ function goToLocation(locationObject) {
 // Uses location's bounds to set appropriate zoom level.
 function setMapViewportUsingBounds(locationObject) {
   console.log('setMapViewportUsingBounds');
-  var bounds = new google.maps.LatLngBounds();
+  let bounds = new google.maps.LatLngBounds();
   // Use location's northwest and southeast extremes to set zoom: 
   bounds.extend(locationObject.geometry.viewport.northeast);
   bounds.extend(locationObject.geometry.viewport.southwest);
@@ -220,42 +206,31 @@ function requestPlacesJson(locationLatLng, placeType, radius) {
   service.nearbySearch(request, function(results) {
     heatmapLatLngsArr = makeLatLngsFromPlacesJson(results);
     createHeatmap(heatmapLatLngsArr);
-    if (searchCount > 0) {
-      showResultsInSidebar(results);
-    }
-    searchCount++
-  });
+    showResultsInSidebar(results);
+  })
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!! Changing DOM here! !!!!!!!!!!!!!!!!!!!!!!!!!!
 function showResultsInSidebar(results) {
-  console.log('showResultsInSidebar');
-  revealResultsArea();
+  console.log('showResultsInSidebar');  
   let resultsHtml = prepareResultsHtmlFromResults(results);
   displayResultsHtml(resultsHtml);
-  listenForToggleShowResultsButtonClick();
+  initialRevealResultsArea();
 }
 
-function revealResultsArea() {
-  console.log('revealResultsArea');
-  $('.results-area').removeAttr('hidden');
+function initialRevealResultsArea() {
+  console.log('initialRevealResultsArea');
+  $('.results-area').removeClass('hidden');
+  $('.js-toggle-show-results-button')
+    .removeClass('hidden')
+    .removeClass('show-button')
+    .addClass('hide-button')
+    .html('keyboard_arrow_left')
+    console.log(1);
 }
-
 
 function prepareResultsHtmlFromResults(results) {
   console.log('prepareResultsHtmlFromResults');
-  let attractionName, attractionLocation, attractionPhoto;
+  let attractionName, attractionLocation, attractionPhoto, attractionId;
   let html = `<div class="results-initial-margin">
                 <p>Results on the heatmap:</p>
               </div>
@@ -265,8 +240,9 @@ function prepareResultsHtmlFromResults(results) {
     attractionName = thisAttraction.name;
     attractionLocation = thisAttraction.vicinity;
     attractionPhoto = makeAttractionPhotoHtml(thisAttraction);
+    attractionId = ''
     html +=
-      `<section class="attraction-individual-area">
+      `<section class="attraction-individual-area" attractionid="${attractionId}">
               <img class="attraction-image" src="${attractionPhoto}" alt="${attractionName}">
               <h3>${attractionName}</h3>
               <p>${attractionLocation}</p>
@@ -295,20 +271,28 @@ function displayResultsHtml(resultsHtml) {
 function listenForToggleShowResultsButtonClick() {
   console.log('listenForToggleShowResultsButtonClick');
   $('.js-toggle-show-results-button').on('click', function(event) {
-    console.log(1);
-    if ($(event.target).hasClass('hide-button')) {
-      $(event.target).removeClass('hide-button')
-        .addClass('show-button')
-        .html('keyboard_arrow_right');
-      $('.results-area').attr('hidden', 'true');
+    if ($('.js-toggle-show-results-button').hasClass('hide-button')) {
+      unhideResultsAndDisplayTheHideButton();
     } else {
-      $(event.target).removeClass('show-button')
-        .addClass('hide-button')
-        .html('keyboard_arrow_left');
-      $('.results-area').removeAttr('hidden');
-
+      hideResultsAnddDisplayTheShowButton();
     }
   })
+}
+
+function unhideResultsAndDisplayTheHideButton() {
+  console.log('unhideResultsAndDisplayTheHideButton');
+  $('.js-toggle-show-results-button').removeClass('hide-button')
+    .addClass('show-button')
+    .html('keyboard_arrow_right');
+  $('.results-area').addClass('hidden');
+}
+
+function hideResultsAnddDisplayTheShowButton() {
+  console.log('hideResultsAnddDisplayTheShowButton');
+  $('.js-toggle-show-results-button').removeClass('show-button')
+    .addClass('hide-button')
+    .html('keyboard_arrow_left');
+  $('.results-area').removeClass('hidden');
 }
 
 // creates lat/lngs object in the format accepted by the API.
@@ -409,31 +393,6 @@ $('.js-search-box').focus()
 startListeningForUserInput();
 
 
-
-/* ------------- Currently Deactivated [begins] ------------- */
-// Hides background layer.
-// Background layer is hidden for now because it makes testing 
-// the app less easy.  Might remove anyway for UX reasons.
-function revealMap() {
-  $('.background-shading').remove();
-  $('.main').html('');
-}
-
-// Creates and (asynchronously) loads buttons.
-// Deactivated for now.  Possibly to be removed and replaced
-// by persistant buttons I will eventually add to <main> in index.html.
-function generateMapPlaceTypeButtonsHtml() {
-  console.log('generateMapPlaceTypeButtonsHtml');
-  let dashboardHtml =
-    `<ul class="place-type-buttons">
-      <li><button class="js-place-type-button">test</button></li>
-      <li><button class="js-place-type-button">test</button></li>
-      <li><button class="js-place-type-button">test</button></li>
-      <li><button class="js-place-type-button">test</button></li>
-    </ul>`
-  $('main').append(dashboardHtml);
-}
-/* ------------- Currently Deactivated [ends] ------------- */
 
 // Additional Google Maps heatmap controls available online:
 // https://developers.google.com/maps/documentation/javascript/examples/layer-heatmap
