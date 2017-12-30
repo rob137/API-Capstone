@@ -283,7 +283,8 @@ function unhideResultsAndDisplayTheHideButton() {
   console.log('unhideResultsAndDisplayTheHideButton');
   $('.js-toggle-show-results-button').removeClass('hide-button')
     .addClass('show-button')
-    .html('keyboard_arrow_right');
+    .html('keyboard_arrow_right')
+    .attr('title', 'Show the sidebar');
   $('.results-area').addClass('hidden');
 }
 
@@ -291,7 +292,8 @@ function hideResultsAnddDisplayTheShowButton() {
   console.log('hideResultsAnddDisplayTheShowButton');
   $('.js-toggle-show-results-button').removeClass('show-button')
     .addClass('hide-button')
-    .html('keyboard_arrow_left');
+    .html('keyboard_arrow_left')
+    .attr('title', 'Hide the sidebar');
   $('.results-area').removeClass('hidden');
 }
 
