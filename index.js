@@ -513,8 +513,8 @@ function initMap() {
   console.log('initMap');
   // Create Google Map centered on defaultLatLng. 
   map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 18, //---------------------------------- testing
-    center: defaultLatLng, //---------------------------------- testing
+    zoom: 15,
+    center: defaultLatLng,
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
       position: google.maps.ControlPosition.BOTTOM_LEFT,
@@ -522,9 +522,9 @@ function initMap() {
   });
 
   // To demonstrate utility to user on pageload:
-  // performInitialHeatmapSearch() ;
+  performInitialHeatmapSearch() ;
   // Add autocomplete functionality to searchbar.
-  prepareAutocomplete(); //---------------------------------- testing
+  prepareAutocomplete(); 
   // Add 'search around a clicked spot on the map' functionality 
   prepareSearchOnClickToMap();
 }
