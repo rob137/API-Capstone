@@ -82,7 +82,7 @@ function checkProposedLocationIsValid(locationJson) {
   console.log('checkProposedLocationIsValid');
   if (locationJson.status == "ZERO_RESULTS") {
     // Show an error if it isn't on Google's API... 
-    console.log('Proposed location is invalid.')
+    console.log('Error - proposed location is not found.')
     displayNoSuchLocationErrorMessage();
   } else {
     // In case the error message is already displayed
@@ -92,7 +92,7 @@ function checkProposedLocationIsValid(locationJson) {
     // Center the map
     goToLocation(locationObject);
     //
-    makeNewHeatmapRequest(locationObject);
+    makeNewPlacesRequest(locationObject);
   }
 }
 
@@ -113,7 +113,6 @@ function removeNoSuchLocationErrorMessage() {
 // Centers map on new location.
 function goToLocation(locationObject) {
   console.log('goToLocation');
-  console.log(locationObject);
   if (locationObject.geometry.viewport) {
     // If available, consider the location's size to help set zoom level...
     setMapViewportUsingBounds(locationObject)
@@ -180,8 +179,8 @@ function centerMapOnLocation(latLngObject) {
 }
 
 // Pulls together data for request, then makes request.
-function makeNewHeatmapRequest(locationObject) {
-  console.log('makeNewHeatmapRequest');
+function makeNewPlacesRequest(locationObject) {
+  console.log('makeNewPlacesRequest');
 
   // Pulling together request data: 
   let locationLatLng, radius, placeCategory;
@@ -252,7 +251,7 @@ function getRadiusForPlacesRequest() {
   return dis;
 }
 
-// Requests places and makes a heatmapArr for createHeatmap().
+// Requests places and makes a heatmapArr for createHeatmap.
 // Might change to 'handleRequestForPlacesJson' and use it to direct to different functions for
 // collections (culture) and individual categories (church)
 function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
@@ -276,15 +275,15 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
 
     // Wait for json request to be fulfilled...
     setTimeout(function() {
-      // Put unique results in uniqueSearchResultsArr
 
-      filterResults()
+      // Put unique results in uniqueSearchResultsArr
+      uniqueSearchResultsArr = filterResults(aggregateSearchResultsArr);
       // Build the heatmap with uniqueSearchResultsArr
       heatmapLatLngsArr = makeLatLngsFromPlacesJson(uniqueSearchResultsArr);
       createHeatmap(heatmapLatLngsArr);
       showResultsInSidebar(uniqueSearchResultsArr);
-
-
+      console.log(aggregateSearchResultsArr);
+      console.log(uniqueSearchResultsArr);
     }, 2000)
 
 
@@ -296,10 +295,9 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
       type: placeCategory
     }
     service.nearbySearch(request, function(results) {
-      // Results are stored in global variable placesJson for use 
-      // later - see listenForUserClickOnResults
-      makeLatLngsFromPlacesJson(results);
-      createHeatmap(results);
+      // Results are stored in global variable uniqueSearchResultsArr 
+      heatmapLatLngsArr = makeLatLngsFromPlacesJson(results);
+      createHeatmap(heatmapLatLngsArr);
       showResultsInSidebar(results);
       uniqueSearchResultsArr = results;
     })
@@ -316,6 +314,7 @@ function combineResults(results, arr) {
 }
 
 function prepareRequest(locationLatLng, placeCategory, radius) {
+  console.log('prepareRequest');
   let request = {
     location: locationLatLng,
     radius: radius,
@@ -324,24 +323,23 @@ function prepareRequest(locationLatLng, placeCategory, radius) {
   return request;
 }
 
-function filterResults() {
-  // Doing this first prevents an Uncaught ReferenceError
-  if (uniqueSearchResultsArr.length < 1) {
-    uniqueSearchResultsArr.push(aggregateSearchResultsArr[0]);
-  }
-
-  // For each location: if it's not already in the array, then add it.
-  for (let searchResult in aggregateSearchResultsArr) {
-    if (!checkMembership(uniqueSearchResultsArr, aggregateSearchResultsArr[searchResult].id)) {
-      uniqueSearchResultsArr.push(aggregateSearchResultsArr[searchResult]);
+// Returns an array of unique search results
+// ---------------------------------------------------------------------- Need to research and understand!
+function filterResults(array) {
+  let uniqueSearchResultsArr = [];
+  array.forEach(function(item) {
+    if (uniqueSearchResultsArr.filter(function(n) {
+        return n.id === item.id
+      }).length == 0) {
+      uniqueSearchResultsArr.push(item);
     }
-  }
-  console.log(aggregateSearchResultsArr);
-  console.log(uniqueSearchResultsArr);
+  });
+  return uniqueSearchResultsArr;
 }
 
 // Filters out duplicate objects from an array
 function checkMembership(uniqueSearchResultsArr, value) {
+  console.log('checkMembership');
   for (let item in uniqueSearchResultsArr) {
     if (uniqueSearchResultsArr[item].id == value) {
       return true;
@@ -416,6 +414,7 @@ function displayResultsHtml(resultsHtml) {
 
 // Highlights place on map when user clicks a place item in the sidebar.
 function listenForUserClickOnResults() {
+  console.log('listenForUserClickOnResults');
   $('.results-area').on('click', '.attraction-individual-area', function(event) {
     let thisAttractionId, thisAttractionObject, thisAttractionLatLngObject;
     thisAttractionId = $(event.target).closest('section').attr('attractionid');
@@ -514,20 +513,18 @@ function initMap() {
   console.log('initMap');
   // Create Google Map centered on defaultLatLng. 
   map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 17,
-    center: defaultLatLng,
+    zoom: 18, //---------------------------------- testing
+    center: defaultLatLng, //---------------------------------- testing
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
       position: google.maps.ControlPosition.BOTTOM_LEFT,
     }
   });
 
-  // for pageload:
-  performInitialHeatmapSearch();
-
+  // To demonstrate utility to user on pageload:
+  // performInitialHeatmapSearch() ;
   // Add autocomplete functionality to searchbar.
-  prepareAutocomplete();
-
+  prepareAutocomplete(); //---------------------------------- testing
   // Add 'search around a clicked spot on the map' functionality 
   prepareSearchOnClickToMap();
 }
@@ -543,7 +540,7 @@ function performInitialHeatmapSearch() {
   }, function(error) {
     // If the user's location isn't available:
     centerMapOnLocation(defaultLatLng);
-    makeNewHeatmapRequest(defaultLatLng);
+    makeNewPlacesRequest(defaultLatLng);
   });
 }
 
@@ -569,17 +566,18 @@ function prepareAutocomplete() {
       // else just center on the location
       centerMapOnLocation(placeLatLngObj);
     }
-    makeNewHeatmapRequest(placeLatLngObj);
+    makeNewPlacesRequest(placeLatLngObj);
   });
 }
 
 function prepareSearchOnClickToMap() {
   google.maps.event.addListener(map, 'click', function(event) {
+    console.log('handling map click...');
     let clickedLatLngObject = {
       lat: event.latLng.lat(),
       lng: event.latLng.lng()
     }
-    makeNewHeatmapRequest(clickedLatLngObject);
+    makeNewPlacesRequest(clickedLatLngObject);
   });
 }
 
@@ -588,11 +586,12 @@ function centerOnUserLocation(userPosition) {
   console.log('centerOnUserLocation');
   userLocationLatLngObject = new google.maps.LatLng(userPosition.coords.latitude, userPosition.coords.longitude);
   centerMapOnLocation(userLocationLatLngObject);
-  makeNewHeatmapRequest(userLocationLatLngObject);
+  makeNewPlacesRequest(userLocationLatLngObject);
 }
 
 // Marks user location with circle and temporary label.
 function showUserLocation() {
+  console.log('showUserLocation');
   console.log('showLocation');
   let infoWindow = new google.maps.InfoWindow;
   let radius = getRadiusForPlacesRequest() / 45;

@@ -87,7 +87,8 @@ input, .select-place-type {
 	z-index: -1;
 	background-color: white;
 	position: fixed;
-	width: 350px;
+	/* width: 350px; */
+	width: 200px; 
 	height: 85vh;
 	margin: 0 auto;
 	top: 110px;
