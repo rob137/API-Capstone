@@ -100,7 +100,10 @@ function checkProposedLocationIsValid(locationJson) {
 // Presents error to user when location isn't in database.
 function displayNoSuchLocationErrorMessage() {
   console.log('displayNoSuchLocationErrorMessage');
-  let noSuchLocationErrorMessage = `Sorry, that location isn't available. <br> Please try another.`;
+  let noSuchLocationErrorMessage = 
+  `<i class="material-icons">mood_bad</i>
+  <br>Sorry, that location isn't available... Why not try another? 
+  `;
   $('.js-no-such-location-error-message').html(noSuchLocationErrorMessage).removeAttr('hidden');
 }
 

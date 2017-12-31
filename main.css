@@ -36,10 +36,13 @@ h1 {
 .no-such-location-error-message {
 	position: relative;
 	background-color: red;
-	width: 30%;
 	text-align: center;
-	left: 60%;
+	height: 60px;
+	box-shadow: 1px 2px grey;
+	padding-top: 8px;
+	padding-bottom: 18px;
 }
+
 
 hr {
 	border-top: 1px #DBDBDB solid;
@@ -67,11 +70,19 @@ input, .select-place-type {
 }
 
 .search-icon {
+	text-align: center;
 	position: fixed;
-	top: 65px;
+	padding-top: 2px;
+	padding-left: 1px;
+	top: 58px;
 	right: 30px;
+	width: 43px;
+	height: 43px;
 	cursor: pointer;
 	background-color: #FAFAFB;
+	border: 8px solid #DA6161;
+	border-radius: 100px;
+	box-shadow: 1px 0.5px grey;
 }
 
 .no-such-location-error-message {
