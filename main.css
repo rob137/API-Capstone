@@ -4,8 +4,29 @@ body {
 	z-index: -100;
 }
 
+.welcome-screen {
+	position: fixed;
+	top: 30vh;
+	left: 50%;
+	transform: translateX(-50%);
+	text-align: center;
+	background-color: red;
+	z-index: 1;
+}
+
 p h2 h3 {
 	color: #382D5E
+}
+
+.background-shroud {
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	left: 0;
+	top: 0;
+	z-index: 1;
+	background-color: black;
+	opacity: 0.8;	
 }
 
 .search-area {
@@ -35,14 +56,21 @@ h1 {
 
 .no-such-location-error-message {
 	position: relative;
-	background-color: red;
+	background-color: #FAFAFB;
 	text-align: center;
 	height: 60px;
-	box-shadow: 1px 2px grey;
+	width: 44%;
+	right: 7.5%;
+	float: right;
+	box-shadow: 1px 1px grey;
 	padding-top: 8px;
 	padding-bottom: 18px;
 }
 
+.no-such-location-error-message-close {
+	float: right;
+	cursor: pointer;
+}
 
 hr {
 	border-top: 1px #DBDBDB solid;
@@ -99,18 +127,28 @@ input, .select-place-type {
 	background-color: white;
 	position: fixed;
 	width: 350px; 
-	height: 85vh;
-	margin: 0 auto;
+	height: 85.4vh;
 	top: 110px;
 	left: 0;
 	overflow-y: auto;
 	border-right: 3px solid white;
-	z-index: 1;
+	z-index: 2;
+	padding: 0;
+}
+
+.results-background {
+	top: 0;
+	left: 0;
+	position: relative;
+	width: 350px; 
+	height: 100vh;
+	position: fixed;
+	background-color: white;
+	z-index: 1
 }
 
 .map {
-	top: 105px;
-	height: 85vh;
+	height: 98vh;
 	width: 100%;
 	position: fixed;
 }
@@ -122,7 +160,7 @@ input, .select-place-type {
 	position: fixed;
 	color: black;
 	background-color: white;
-	z-index: 2;
+	z-index: 5;
 	top: 300px;
 	box-shadow: 1px 0.5px grey;
 }
@@ -136,13 +174,13 @@ input, .select-place-type {
 }
 
 .results-initial-margin {
-	height: 4vh;
 	text-align: center;
 }
 
 .results-initial-margin p {
 	position: relative;
 	vertical-align: center;
+	margin: 0;
 }
 
 .attraction-individual-area {

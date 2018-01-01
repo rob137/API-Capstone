@@ -9,13 +9,31 @@ let defaultLatLng = {
   lng: -0.1123
 };
 
+
+
 // Initiates listeners - called on pageload
 function startListeningForUserInput() {
   console.log('startListeningForUserInput');
+  listenForStartClick();
   listenForGoClick();
   listenForReturnOnSearch();
   listenForToggleShowResultsButtonClick();
   listenForUserClickOnResults();
+  listenForUserClickOnCloseNoSuchLocationErrorMessage();
+}
+
+function listenForStartClick() {
+  console.log('listenForStartClick');
+  $('.start-button').on('click', function(event) {
+    revealApp();
+  });
+}
+
+function revealApp() {
+  console.log('revealApp');
+  $('main').removeClass('hidden');
+  $('.background-shroud').addClass('hidden');
+  $('.welcome-screen').addClass('hidden');
 }
 
 // Takes user input (location and place type) and
@@ -85,9 +103,6 @@ function checkProposedLocationIsValid(locationJson) {
     console.log('Error - proposed location is not found.')
     displayNoSuchLocationErrorMessage();
   } else {
-    // In case the error message is already displayed
-    removeNoSuchLocationErrorMessage();
-
     let locationObject = locationJson.results[0];
     // Center the map
     goToLocation(locationObject);
@@ -96,26 +111,41 @@ function checkProposedLocationIsValid(locationJson) {
   }
 }
 
-
 // Presents error to user when location isn't in database.
 function displayNoSuchLocationErrorMessage() {
   console.log('displayNoSuchLocationErrorMessage');
   let noSuchLocationErrorMessage = 
-  `<i class="material-icons">mood_bad</i>
+  `<i class="js-no-such-location-error-message-close 
+             no-such-location-error-message-close 
+             material-icons">close</i>
+  <i class="material-icons">mood_bad</i>
   <br>Sorry, that location isn't available... Why not try another? 
   `;
   $('.js-no-such-location-error-message').html(noSuchLocationErrorMessage).removeAttr('hidden');
 }
 
-// When the user submits a valid location.
+// Listener for user clicking 'close' to remove error message.
+function listenForUserClickOnCloseNoSuchLocationErrorMessage() {
+  console.log('listenForUserClickOnCloseNoSuchLocationErrorMessage');
+  $('.js-no-such-location-error-message')
+    .on('click', '.js-no-such-location-error-message-close', function(event) {
+      removeNoSuchLocationErrorMessage();
+  });
+}
+
+
+
+// When the user submits a valid location or clicks 'close'.
 function removeNoSuchLocationErrorMessage() {
-  let noSuchLocationErrorMessage;
-  $('.js-no-such-location-error-message').html('<br><br>');
+  console.log('removeNoSuchLocationErrorMessage');
+  $('.js-no-such-location-error-message').html('').attr('hidden', 'true');
 }
 
 // Centers map on new location.
 function goToLocation(locationObject) {
   console.log('goToLocation');
+  // In case the 'no such location' error message is currently displayed
+  removeNoSuchLocationErrorMessage();
   if (locationObject.geometry.viewport) {
     // If available, consider the location's size to help set zoom level...
     setMapViewportUsingBounds(locationObject)
@@ -281,12 +311,11 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
 
       // Put unique results in uniqueSearchResultsArr
       uniqueSearchResultsArr = filterResults(aggregateSearchResultsArr);
+      alphabeticallyOrderResults(uniqueSearchResultsArr)
       // Build the heatmap with uniqueSearchResultsArr
       heatmapLatLngsArr = makeLatLngsFromPlacesJson(uniqueSearchResultsArr);
       createHeatmap(heatmapLatLngsArr);
       showResultsInSidebar(uniqueSearchResultsArr);
-      console.log(aggregateSearchResultsArr);
-      console.log(uniqueSearchResultsArr);
     }, 2000)
 
 
@@ -298,7 +327,7 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
       type: placeCategory
     }
     service.nearbySearch(request, function(results) {
-      // Results are stored in global variable uniqueSearchResultsArr 
+      alphabeticallyOrderResults(results)
       heatmapLatLngsArr = makeLatLngsFromPlacesJson(results);
       createHeatmap(heatmapLatLngsArr);
       showResultsInSidebar(results);
@@ -327,7 +356,6 @@ function prepareRequest(locationLatLng, placeCategory, radius) {
 }
 
 // Returns an array of unique search results
-// ---------------------------------------------------------------------- Need to research and understand!
 function filterResults(array) {
   let uniqueSearchResultsArr = [];
   array.forEach(function(item) {
@@ -338,6 +366,14 @@ function filterResults(array) {
     }
   });
   return uniqueSearchResultsArr;
+}
+
+function alphabeticallyOrderResults(array) {
+  array.sort(function(a, b) {
+    let textA = a.name.toUpperCase();
+    let textB = b.name.toUpperCase();
+    return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+});
 }
 
 // Filters out duplicate objects from an array
@@ -354,21 +390,34 @@ function checkMembership(uniqueSearchResultsArr, value) {
 // Starts the chain of functions to make places appear in sidebar.
 function showResultsInSidebar(results) {
   console.log('showResultsInSidebar');
-  let resultsHtml = prepareResultsHtmlFromResults(results);
+  let resultsHtml;
+  if (results.length > 0) {
+    resultsHtml = prepareResultsHtmlFromResults(results);
+  } else {
+    resultsHtml = `
+    <div class="results-initial-margin">
+                <br>
+                <i class="material-icons">mood_bad</i>
+                <p>Sorry, no results found!</p>
+                <br>
+              </div>
+              <hr>`
+  }
   displayResultsHtml(resultsHtml);
-  initialRevealResultsArea();
+  revealResultsArea();
 }
 
 
 // Sidebar is hidden on pageload - this reveals it.
-function initialRevealResultsArea() {
-  console.log('initialRevealResultsArea');
+function revealResultsArea() {
+  console.log('revealResultsArea');
   $('.results-area').removeClass('hidden');
   $('.js-toggle-show-results-button')
     .removeClass('hidden')
     .removeClass('show-button')
     .addClass('hide-button')
     .html('keyboard_arrow_left');
+  $('.results-background').removeClass('hidden')
 }
 
 // Creates dynamic html for list of locations in sidebar.
@@ -450,29 +499,31 @@ function listenForToggleShowResultsButtonClick() {
   console.log('listenForToggleShowResultsButtonClick');
   $('.js-toggle-show-results-button').on('click', function(event) {
     if ($('.js-toggle-show-results-button').hasClass('hide-button')) {
-      unhideResultsAndDisplayTheHideButton();
+      hideResultsAndDisplayTheShowButton();
     } else {
-      hideResultsAnddDisplayTheShowButton();
+      unhideResultsAndDisplayTheHideButton();
     }
   })
 }
 // see above 
-function unhideResultsAndDisplayTheHideButton() {
+function hideResultsAndDisplayTheShowButton() {
   console.log('unhideResultsAndDisplayTheHideButton');
   $('.js-toggle-show-results-button').removeClass('hide-button')
     .addClass('show-button')
     .html('keyboard_arrow_right')
     .attr('title', 'Show the sidebar');
   $('.results-area').addClass('hidden');
+  $('.results-background').addClass('hidden')
 }
 // see above 
-function hideResultsAnddDisplayTheShowButton() {
-  console.log('hideResultsAnddDisplayTheShowButton');
+function unhideResultsAndDisplayTheHideButton() {
+  console.log('hideResultsAndDisplayTheShowButton');
   $('.js-toggle-show-results-button').removeClass('show-button')
     .addClass('hide-button')
     .html('keyboard_arrow_left')
     .attr('title', 'Hide the sidebar');
   $('.results-area').removeClass('hidden');
+  $('.results-background').removeClass('hidden')
 }
 
 // creates lat/lngs object in the format accepted by the API.
@@ -558,6 +609,9 @@ function prepareAutocomplete() {
   // bounds option in the request.
   autocomplete.bindTo('bounds', map);
   autocomplete.addListener('place_changed', function() {
+
+    // In case the 'no such location' error message is currently displayed
+    removeNoSuchLocationErrorMessage();
     let place = autocomplete.getPlace();
     let placeLatLngObj = makeLatLngObject(place);
     if (place.geometry.viewport) {
