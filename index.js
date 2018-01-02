@@ -51,6 +51,7 @@ function hideYouAreHereLabel() {
 function listenForGoClick() {
   console.log('listenForGoClick');
   $('.js-go-button').on('click', function(event) {
+    event.preventDefault();
     // Will only act if user has typed into the search box.
     initiateSearchFunctions();
   });
@@ -554,6 +555,7 @@ function listenForUserClickOnResults() {
 function listenForToggleShowResultsButtonClick() {
   console.log('listenForToggleShowResultsButtonClick');
   $('.js-toggle-show-results-button').on('click', function(event) {
+    event.preventDefault();
     if ($('.js-toggle-show-results-button').hasClass('hide-button')) {
       hideResultsAndDisplayTheShowButton();
     } else {
