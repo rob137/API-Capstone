@@ -1,6 +1,6 @@
 'use strict';
 
-let map, heatmapLatLngsArr, heatmap, userPosition, userLocationLatLngObject, marker, aggregateSearchResultsArr = [],
+let map, heatmapLatLngsArr, heatmap, userPosition, userLocationLatLngObject, marker, youAreHereLabel, aggregateSearchResultsArr = [],
   uniqueSearchResultsArr = [];
 
 // Initial lat/lng for pageload (if app can't geolocate user)
@@ -8,8 +8,6 @@ let defaultLatLng = {
   lat: 51.5032,
   lng: -0.1123
 };
-
-
 
 // Initiates listeners - called on pageload
 function startListeningForUserInput() {
@@ -30,11 +28,22 @@ function listenForStartClick() {
   });
 }
 
+// Removes the landing page and shows the app
 function revealApp() {
   console.log('revealApp');
-  $('main').removeClass('hidden');
-  $('.background-shroud').addClass('hidden');
-  $('.welcome-screen').addClass('hidden');
+  $('main').show();
+  $('.background-shroud').hide();
+  $('.welcome-screen').hide();
+  if (youAreHereLabel) {
+    // Hides 'you are here' label after 2 seconds
+    hideYouAreHereLabel();
+  }
+}
+
+function hideYouAreHereLabel() {
+  setTimeout(function() {
+    youAreHereLabel.close();
+  }, 2000);
 }
 
 // Takes user input (location and place type) and
@@ -62,12 +71,12 @@ function displayHelp() {
   First, pick your interest from the drop-down menu.  
   Then either write a location or click on the map. </p>
   `
-  $('.help-text').html(html).removeClass('hidden');
+  $('.help-text').html(html).show();
 
 }
 
 function hideHelp() {
-  $('.help-text').html('').addClass('hidden');
+  $('.help-text').html('').hide();
 } 
 
 // As above, but listens for user pressing return key
@@ -114,7 +123,7 @@ function getAndCheckLocationJson(geocodeUrl) {
   console.log('getAndCheckLocationJson');
   $.getJSON(geocodeUrl, function(json) {
     let locationJson = json;
-    checkProposedLocationIsValid(locationJson)
+    checkProposedLocationIsValid(locationJson);
   })
 
 }
@@ -284,7 +293,7 @@ function getviewportRadius() {
   }
   let radius = google.maps.geometry.spherical
     .computeDistanceBetween(northEastBoundLatLngObject, southWestBoundLatLngObject) / 4;
-  return radius
+  return radius;
 }
 
 // Ensures heatmap results are drawn from visible map. 
@@ -435,13 +444,13 @@ function showResultsInSidebar(results) {
 // Sidebar is hidden on pageload - this reveals it.
 function revealResultsArea() {
   console.log('revealResultsArea');
-  $('.results-area').removeClass('hidden');
+  $('.results-area').show();
   $('.js-toggle-show-results-button')
-    .removeClass('hidden')
+    .show()
     .removeClass('show-button')
     .addClass('hide-button')
     .html('keyboard_arrow_left');
-  $('.results-background').removeClass('hidden')
+  $('.results-background').show()
 }
 
 // Creates dynamic html for list of locations in sidebar.
@@ -536,8 +545,8 @@ function hideResultsAndDisplayTheShowButton() {
     .addClass('show-button')
     .html('keyboard_arrow_right')
     .attr('title', 'Show the sidebar');
-  $('.results-area').addClass('hidden');
-  $('.results-background').addClass('hidden')
+  $('.results-area').hide();
+  $('.results-background').hide()
 }
 // see above 
 function unhideResultsAndDisplayTheHideButton() {
@@ -546,8 +555,8 @@ function unhideResultsAndDisplayTheHideButton() {
     .addClass('hide-button')
     .html('keyboard_arrow_left')
     .attr('title', 'Hide the sidebar');
-  $('.results-area').removeClass('hidden');
-  $('.results-background').removeClass('hidden')
+  $('.results-area').show();
+  $('.results-background').show()
 }
 
 // creates lat/lngs object in the format accepted by the API.
@@ -595,7 +604,7 @@ function initMap() {
     center: defaultLatLng,
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-      position: google.maps.ControlPosition.BOTTOM_LEFT,
+      position: google.maps.ControlPosition.BOTTOM_CENTER,
     }
   });
 
@@ -616,9 +625,13 @@ function performInitialHeatmapSearch() {
     showUserLocation();
     centerOnUserLocation(userPosition, userLocationLatLngObject);
   }, function(error) {
-    // If the user's location isn't available:
-    centerMapOnLocation(defaultLatLng);
-    makeNewPlacesRequest(defaultLatLng);
+    // Displays an example search to user only if:
+    // 1. The user's location isn't available
+    // 2. The user has not already searched for a heatmap themselves
+    if (!heatmap) {
+      centerMapOnLocation(defaultLatLng);
+      makeNewPlacesRequest(defaultLatLng);
+    }
   });
 }
 
@@ -674,17 +687,17 @@ function centerOnUserLocation(userPosition) {
 function showUserLocation() {
   console.log('showUserLocation');
   console.log('showLocation');
-  let infoWindow = new google.maps.InfoWindow;
+  youAreHereLabel = new google.maps.InfoWindow;
   let radius = getRadiusForPlacesRequest() / 45;
 
-  // Shows label pointing to user location for 2 seconds:
-  infoWindow.setPosition(userLocationLatLngObject);
-  infoWindow.setContent("You!");
-  infoWindow.open(map);
-  setTimeout(function() {
-    infoWindow.close();
-  }, 2000);
-
+  // Shows label pointing to user location:
+  youAreHereLabel.setPosition(userLocationLatLngObject);
+  youAreHereLabel.setContent("You!");
+  youAreHereLabel.open(map);
+  if ($('.background-shroud').hasClass('hidden')) {
+    // Hides the label after 2 seconds:
+    hideYouAreHereLabel()
+  }
   // Shows circle on user location:
   new google.maps.Circle({
     strokeColor: '#F48024',
