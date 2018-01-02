@@ -58,14 +58,16 @@ function listenForHelpFocus() {
 function displayHelp() {
   let html = `
   <h3>Help</h3>
-  <p>Find the best areas to explore, quickly!  First, pick your interest from the drop-down menu.  Then either write a location or click on the map. </p>
+  <p>Find the best areas to explore, quickly!  
+  First, pick your interest from the drop-down menu.  
+  Then either write a location or click on the map. </p>
   `
   $('.help-text').html(html).removeClass('hidden');
 
 }
 
 function hideHelp() {
-  $('.help-text').html('').addClass('hidden', 'true');
+  $('.help-text').html('').addClass('hidden');
 } 
 
 // As above, but listens for user pressing return key

@@ -83,11 +83,13 @@ h1 {
 	text-align: justify;
 	z-index: 3;
 	width: 200px;
-	position: relative;
+	position: fixed;
 	background-color: #FAFAFB;
 	text-align: center;
 	float: right;
 	margin-top: 0;
+	right: 10px;
+	top: 40px;
 	padding: 5px;
 	box-shadow: 1px 1px grey;
 	
