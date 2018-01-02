@@ -171,7 +171,7 @@ function listenForUserClickOnCloseNoSuchLocationErrorMessage() {
 // When the user submits a valid location or clicks 'close'.
 function removeNoSuchLocationErrorMessage() {
   console.log('removeNoSuchLocationErrorMessage');
-  $('.js-no-such-location-error-message').html('').attr('hidden', 'true');
+  $('.js-no-such-location-error-message').html('').hide();
 }
 
 // Centers map on new location.
@@ -608,12 +608,14 @@ function initMap() {
     }
   });
 
+
   // To demonstrate utility to user on pageload:
-  performInitialHeatmapSearch() ;
+  performInitialHeatmapSearch();
   // Add autocomplete functionality to searchbar.
   prepareAutocomplete(); 
   // Add 'search around a clicked spot on the map' functionality 
   prepareSearchOnClickToMap();
+
 }
 
 // Either perform initial search on user's location, or use
@@ -694,7 +696,9 @@ function showUserLocation() {
   youAreHereLabel.setPosition(userLocationLatLngObject);
   youAreHereLabel.setContent("You!");
   youAreHereLabel.open(map);
-  if ($('.background-shroud').hasClass('hidden')) {
+
+  let backgroundShroud = document.getElementById('js-background-shroud');
+  if (backgroundShroud.hasAttribute('hidden')) {
     // Hides the label after 2 seconds:
     hideYouAreHereLabel()
   }
