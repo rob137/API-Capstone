@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
+		<meta description="An interactive heatmap that highlights attractions. Provides 'at a glance' hints for people exploring new places.">
 		<title>API Capstone Project</title>
 		<link rel="stylesheet" type="text/css" href="main.css">
 		<link rel="stylesheet" type="text/css" href="float-grid.css">
@@ -18,41 +19,44 @@
 				Choose your interests and click the map to see where's hot.</p>
 				<button class='start-button'>Go!</button>
 			</section>
-			<main hidden>
+			<main aria-live="polite" hidden>
 				<header class="search-area">
 					<h1>Heatmap Search</h1>
 					<aside>
-						<i class="help material-icons">help_outline</i>
-						<p class='help-text' hidden></p>
+						<button class="help-button help" alt="Focus here for help."><i class="material-icons">help_outline</i></button>
+						<p aria-live="assertive" class='help-text' hidden></p>
 					</aside>
-					<form>
-						<select class="select-place-type js-select-place-type">
-							<option class="option-place-type js-option-place-type collection" value="city_hall,church,synagogue,mosque,hindu_temple,library,museum,art_gallery">Cultural Attractions</option>
-							<option class="option-place-type js-option-place-type" value="art_gallery">Art Galleries</option>
-							<option class="option-place-type js-option-place-type" value="museum">Museums</option>
-							<option class="option-place-type js-option-place-type collection" value="movie_theater,bowling_alley,aquarium,park">Entertainment</option>
-							<option class="option-place-type js-option-place-type collection" value="meal_takeaway,bakery,restaurant">Food (all)</option>
-							<option class="option-place-type js-option-place-type" value="restaurant">Restaurants</option>
-							<option class="option-place-type js-option-place-type" value="cafe">Cafes</option>
-							<option class="option-place-type js-option-place-type" value="department_store">Department Stores</option>
-							<option class="option-place-type js-option-place-type" value="store">Shops (all)</option>
-							<option class="option-place-type js-option-place-type collection" value="restaurant,bar,night_club,casino">Nightlife</option>
-							<option class="option-place-type js-option-place-type" value="bar" selected='selected'>Bars</option>
-							<option class="option-place-type js-option-place-type" value="night_club">Night Clubs</option>
-							<option class="option-place-type js-option-place-type" value="casino">Casinos</option>
-						</select>
-						<input type="search"  name="search-box" class="js-search-box search-box" id="js-search-box" placeholder="Enter an address" required><p class="js-no-such-location-error-message no-such-location-error-message" hidden></p><i class="material-icons search-icon js-search-icon go-button js-go-button" alt="search_icon">search</i>
+					<form >
+						<section class="search-params-boxes">
+							<select aria-live="polite" class="select-place-type js-select-place-type">
+								<option class="option-place-type js-option-place-type collection" value="city_hall,church,synagogue,mosque,hindu_temple,library,museum,art_gallery">Cultural Attractions</option>
+								<option class="option-place-type js-option-place-type" value="art_gallery">Art Galleries</option>
+								<option class="option-place-type js-option-place-type" value="museum">Museums</option>
+								<option class="option-place-type js-option-place-type collection" value="movie_theater,bowling_alley,aquarium,park">Entertainment</option>
+								<option class="option-place-type js-option-place-type collection" value="meal_takeaway,bakery,restaurant">Food (all)</option>
+								<option class="option-place-type js-option-place-type" value="restaurant">Restaurants</option>
+								<option class="option-place-type js-option-place-type" value="cafe">Cafes</option>
+								<option class="option-place-type js-option-place-type" value="department_store">Department Stores</option>
+								<option class="option-place-type js-option-place-type" value="store">Shops (all)</option>
+								<option class="option-place-type js-option-place-type collection" value="restaurant,bar,night_club,casino">Nightlife</option>
+								<option class="option-place-type js-option-place-type" value="bar" selected='selected'>Bars</option>
+								<option class="option-place-type js-option-place-type" value="night_club">Night Clubs</option>
+								<option class="option-place-type js-option-place-type" value="casino">Casinos</option>
+							</select>
+							<input type="search" aria-live="assertive" name="search-box" class="js-search-box search-box" id="js-search-box" placeholder="Enter an address" required><p class="js-no-such-location-error-message no-such-location-error-message" hidden></p>
+						</section>
+						<button class="search-button search-icon js-search-icon go-button js-go-button">
+						<i class="material-icons" alt="Click here to search">search</i></button>
 					</form>
 				</header>
-				<section class="results" hidden>
+				<section class="results" aria-live="polite" id="js-results" hidden>
 					<div class="results-background" hidden></div>
-					<aside class="results-area" hidden>
-					</aside hidden>
-					<i class="material-icons toggle-show-results-button js-toggle-show-results-button hide-button" alt="Hide the sidebar" title="Hide the sidebar">keyboard_arrow_left</i>
+					<aside class="results-area" aria-live="assertive" id="js-results-area" hidden>
+					</aside>
+					<button class="toggle-show-results-button js-toggle-show-results-button hide-button""><i class="material-icons" alt="Click here to hide the sidebar" title="Hide the sidebar">keyboard_arrow_left</i></button>
 				</section>
 			</main>
-			<div class="js-map map" id="map"></div>
-			
+			<div class="js-map map" aria-live="polite" id="map"></div>
 			<script
 				src="https://code.jquery.com/jquery-3.2.1.min.js"
 				integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="

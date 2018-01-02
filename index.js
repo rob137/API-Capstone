@@ -56,12 +56,22 @@ function listenForGoClick() {
   });
 }
 
+// Allows help to display/hide when in/out focus
 function listenForHelpFocus() {
+  // for mouse users
   $('.help').on('mouseenter', function() {
     displayHelp();
   }).on('mouseleave', function() {
     hideHelp();
   });
+
+  // for keyboard users
+  $('.help').focus(function() {
+    displayHelp();
+  }).focusout(function() {
+    hideHelp()
+  });
+
 }
 
 function displayHelp() {
@@ -77,7 +87,7 @@ function displayHelp() {
 
 function hideHelp() {
   $('.help-text').html('').hide();
-} 
+}
 
 // As above, but listens for user pressing return key
 // on a location search.
@@ -147,8 +157,8 @@ function checkProposedLocationIsValid(locationJson) {
 // Presents error to user when location isn't in database.
 function displayNoSuchLocationErrorMessage() {
   console.log('displayNoSuchLocationErrorMessage');
-  let noSuchLocationErrorMessage = 
-  `<i class="js-no-such-location-error-message-close 
+  let noSuchLocationErrorMessage =
+    `<i class="js-no-such-location-error-message-close 
              no-such-location-error-message-close 
              material-icons">close</i>
   <i class="material-icons">mood_bad</i>
@@ -163,7 +173,7 @@ function listenForUserClickOnCloseNoSuchLocationErrorMessage() {
   $('.js-no-such-location-error-message')
     .on('click', '.js-no-such-location-error-message-close', function(event) {
       removeNoSuchLocationErrorMessage();
-  });
+    });
 }
 
 
@@ -203,7 +213,7 @@ function setMapViewportUsingBounds(locationObject) {
 
 // Returns lat/lng in format that can be used with Google Maps.
 // There are several ways that Google's APIs present lat/lng data.
-// This function handles them or displays an error message.
+// This function handles them or displays an error message. 
 function makeLatLngObject(source) {
   console.log('makeLatLngObject');
   let latLngObject;
@@ -241,6 +251,7 @@ function makeLatLngObject(source) {
 // Usually called on the results of makeLatLngObject (see above).
 function centerMapOnLocation(latLngObject) {
   console.log('centerOnLocation');
+  let resultsArea = document.getElementById('js-results')
   map.setCenter(latLngObject);
 }
 
@@ -345,10 +356,10 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
       // Put unique results in uniqueSearchResultsArr
       uniqueSearchResultsArr = filterResults(aggregateSearchResultsArr);
       alphabeticallyOrderResults(uniqueSearchResultsArr)
+      showResultsInSidebar(uniqueSearchResultsArr);
       // Build the heatmap with uniqueSearchResultsArr
       heatmapLatLngsArr = makeLatLngsFromPlacesJson(uniqueSearchResultsArr);
       createHeatmap(heatmapLatLngsArr);
-      showResultsInSidebar(uniqueSearchResultsArr);
     }, 2000)
 
 
@@ -361,10 +372,9 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
     }
     service.nearbySearch(request, function(results) {
       alphabeticallyOrderResults(results)
-      heatmapLatLngsArr = makeLatLngsFromPlacesJson(results);
-      createHeatmap(heatmapLatLngsArr);
       showResultsInSidebar(results);
-      uniqueSearchResultsArr = results;
+      heatmapLatLngsArr = makeLatLngsFromPlacesJson(results); 
+      createHeatmap(heatmapLatLngsArr);
     })
   }
 }
@@ -406,7 +416,7 @@ function alphabeticallyOrderResults(array) {
     let textA = a.name.toUpperCase();
     let textB = b.name.toUpperCase();
     return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
-});
+  });
 }
 
 // Filters out duplicate objects from an array
@@ -436,21 +446,34 @@ function showResultsInSidebar(results) {
               </div>
               <hr>`
   }
-  displayResultsHtml(resultsHtml);
+  loadResultsHtml(resultsHtml);
   revealResultsArea();
 }
 
-
-// Sidebar is hidden on pageload - this reveals it.
+// Reveals sidebar
 function revealResultsArea() {
   console.log('revealResultsArea');
-  $('.results-area').show();
-  $('.js-toggle-show-results-button')
-    .show()
-    .removeClass('show-button')
-    .addClass('hide-button')
-    .html('keyboard_arrow_left');
-  $('.results-background').show()
+  $('.results').show();
+  unhideResultsAndDisplayTheHideButton();  
+}
+
+// Checks need to recent map on webpage for UX
+function checkNeedForRecentering() {
+  console.log('checkNeedForRecentering');
+  let resultsArea = document.getElementById('js-results');
+  console.log($(window).width() > 750);
+  //if (!resultsArea.hasAttribute('hidden') && $(window).width() > 750) {
+  if ($(window).width() > 750) {
+    let visibleMapWidth = $(window).width() - 350;
+    let visibleMapHeight = $(window).height() - 120;
+    panMap(-visibleMapWidth / 7, -visibleMapHeight / 6);
+  } 
+}
+
+// Allows manual recenter of map
+function panMap(x, y) {
+  console.log('panMap');
+  map.panBy(x, y);
 }
 
 // Creates dynamic html for list of locations in sidebar.
@@ -491,9 +514,9 @@ function makeAttractionPhotoHtml(thisAttraction) {
   }
 }
 
-// Show the html
-function displayResultsHtml(resultsHtml) {
-  console.log('displayResultsHtml');
+// Load the html
+function loadResultsHtml(resultsHtml) {
+  console.log('loadResultsHtml');
   $('.results-area').html(resultsHtml);
 }
 
@@ -543,8 +566,8 @@ function hideResultsAndDisplayTheShowButton() {
   console.log('unhideResultsAndDisplayTheHideButton');
   $('.js-toggle-show-results-button').removeClass('hide-button')
     .addClass('show-button')
-    .html('keyboard_arrow_right')
-    .attr('title', 'Show the sidebar');
+    .attr('title', 'Show the sidebar')
+    .children(".material-icons").html('keyboard_arrow_right');
   $('.results-area').hide();
   $('.results-background').hide()
 }
@@ -553,8 +576,8 @@ function unhideResultsAndDisplayTheHideButton() {
   console.log('hideResultsAndDisplayTheShowButton');
   $('.js-toggle-show-results-button').removeClass('show-button')
     .addClass('hide-button')
-    .html('keyboard_arrow_left')
-    .attr('title', 'Hide the sidebar');
+    .attr('title', 'Hide the sidebar')
+    .children(".material-icons").html('keyboard_arrow_left');
   $('.results-area').show();
   $('.results-background').show()
 }
@@ -591,7 +614,10 @@ function createHeatmap(heatmapLatLngsArr) {
     heatmap.data = newData;
     // In case the heatmap is currently hidden:
     heatmap.setMap(map);
+
   }
+
+  checkNeedForRecentering();
 }
 
 // Called when Google API finishes loading.  Kickstarts the page with
@@ -612,7 +638,7 @@ function initMap() {
   // To demonstrate utility to user on pageload:
   performInitialHeatmapSearch();
   // Add autocomplete functionality to searchbar.
-  prepareAutocomplete(); 
+  prepareAutocomplete();
   // Add 'search around a clicked spot on the map' functionality 
   prepareSearchOnClickToMap();
 
