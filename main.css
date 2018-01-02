@@ -72,6 +72,13 @@ h1 {
 	text-align: center;
 }
 
+.help {
+	position: fixed;
+	right: 10px;
+	top: 15px;
+	cursor: pointer;
+}
+
 .no-such-location-error-message {
 	position: relative;
 	background-color: #FAFAFB;

@@ -16,6 +16,7 @@ function startListeningForUserInput() {
   console.log('startListeningForUserInput');
   listenForStartClick();
   listenForGoClick();
+  listenForHelpClick()
   listenForReturnOnSearch();
   listenForToggleShowResultsButtonClick();
   listenForUserClickOnResults();
@@ -44,6 +45,12 @@ function listenForGoClick() {
     // Will only act if user has typed into the search box.
     initiateSearchFunctions();
   });
+}
+
+function listenForHelpClick() {
+  $('.help').on('click', function() {
+    console.log(1);
+  })
 }
 
 // As above, but listens for user pressing return key
