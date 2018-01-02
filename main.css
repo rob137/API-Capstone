@@ -79,6 +79,20 @@ h1 {
 	cursor: pointer;
 }
 
+.help-text {
+	text-align: justify;
+	z-index: 3;
+	width: 200px;
+	position: relative;
+	background-color: #FAFAFB;
+	text-align: center;
+	float: right;
+	margin-top: 0;
+	padding: 5px;
+	box-shadow: 1px 1px grey;
+	
+}
+
 .no-such-location-error-message {
 	position: relative;
 	background-color: #FAFAFB;

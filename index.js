@@ -16,7 +16,7 @@ function startListeningForUserInput() {
   console.log('startListeningForUserInput');
   listenForStartClick();
   listenForGoClick();
-  listenForHelpClick()
+  listenForHelpFocus()
   listenForReturnOnSearch();
   listenForToggleShowResultsButtonClick();
   listenForUserClickOnResults();
@@ -47,11 +47,26 @@ function listenForGoClick() {
   });
 }
 
-function listenForHelpClick() {
-  $('.help').on('click', function() {
-    console.log(1);
-  })
+function listenForHelpFocus() {
+  $('.help').on('mouseenter', function() {
+    displayHelp();
+  }).on('mouseleave', function() {
+    hideHelp();
+  });
 }
+
+function displayHelp() {
+  let html = `
+  <h3>Help</h3>
+  <p>Find the best areas to explore, quickly!  First, pick your interest from the drop-down menu.  Then either write a location or click on the map. </p>
+  `
+  $('.help-text').html(html).removeClass('hidden');
+
+}
+
+function hideHelp() {
+  $('.help-text').html('').addClass('hidden', 'true');
+} 
 
 // As above, but listens for user pressing return key
 // on a location search.
