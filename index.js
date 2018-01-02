@@ -150,6 +150,7 @@ function checkProposedLocationIsValid(locationJson) {
     let locationObject = locationJson.results[0];
     // Center the map
     goToLocation(locationObject);
+    checkNeedForRecentering();
     //
     makeNewPlacesRequest(locationObject);
   }
@@ -376,6 +377,7 @@ function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
       showResultsInSidebar(results);
       heatmapLatLngsArr = makeLatLngsFromPlacesJson(results); 
       createHeatmap(heatmapLatLngsArr);
+      uniqueSearchResultsArr = results;
     })
   }
 }
@@ -525,6 +527,7 @@ function loadResultsHtml(resultsHtml) {
 function listenForUserClickOnResults() {
   console.log('listenForUserClickOnResults');
   $('.results-area').on('click', '.attraction-individual-area', function(event) {
+    console.log('clicked on result');
     let thisAttractionId, thisAttractionObject, thisAttractionLatLngObject;
     thisAttractionId = $(event.target).closest('section').attr('attractionid');
 
@@ -539,6 +542,7 @@ function listenForUserClickOnResults() {
     }
 
     // Center map on place clicked
+    console.log(thisAttractionObject);
     thisAttractionLatLngObject = makeLatLngObject(thisAttractionObject);
     centerMapOnLocation(thisAttractionLatLngObject);
 
@@ -618,8 +622,6 @@ function createHeatmap(heatmapLatLngsArr) {
     heatmap.setMap(map);
 
   }
-
-  checkNeedForRecentering();
 }
 
 // Called when Google API finishes loading.  Kickstarts the page with
