@@ -8,7 +8,7 @@ Highlights clusters of attractions like restaurants, museums, bars etc.  Uses th
 
 ##Use Case 
 
-Why is this app useful? Allows users to quickly identify hubs in unfamiliar cities, helping them decide which general area to explore on foot. For flâneurs: "someone who, unlike a tourist, makes a decision at every step to revise his schedule, so he can imbibe things based on new information. The flâneur is not a prisoner of a plan." -- <a href="https://twitter.com/nntaleb">@NNTaleb</a>
+Why is this app useful? Helps users to quickly identify hubs in unfamiliar cities, helping them decide which general area to explore on foot. For flâneurs: "someone who, unlike a tourist, makes a decision at every step to revise his schedule, so he can imbibe things based on new information. The flâneur is not a prisoner of a plan." -- <a href="https://twitter.com/nntaleb">@NNTaleb</a>
 
 ##UX
 
