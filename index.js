@@ -40,6 +40,7 @@ function revealApp() {
   }
 }
 
+// removes 'you are here' label
 function hideYouAreHereLabel() {
   setTimeout(function() {
     youAreHereLabel.close();
@@ -75,15 +76,16 @@ function listenForHelpFocus() {
 
 }
 
+// 
 function displayHelp() {
   let html = `
   <h3>Help</h3>
-  <p>Find the best areas to explore, quickly!  
-  First, pick your interest from the drop-down menu.  
-  Then either write a location or click on the map. </p>
+  <p>Find the best places to explore. To search, just click on
+    the map or type a location into the search bar.  Be sure to
+    pick your interests from the drop-down menu.  
+  </p>
   `
   $('.help-text').html(html).show();
-
 }
 
 function hideHelp() {
