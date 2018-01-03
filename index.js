@@ -206,7 +206,7 @@ function getJsonForCollectionOfCategories(locationLatLng, placeCategory, radius,
   // Wait for all json requests to be fulfilled - can be 5+ requests depending on category.
   setTimeout(function() {
     presentSearchResults(uniqueSearchResultsArr)
-  }, 500)  
+  }, 1500)  
 } 
 
 // For individual categories - eg 'art_gallery' etc
