@@ -2,6 +2,8 @@ body {
 	box-sizing: border-box;
 	font-family: roboto;
 	z-index: -100;
+  -webkit-transition: width 0.5; /* Safari */
+  transition: width 0.5;
 }
 
 .welcome-screen {
