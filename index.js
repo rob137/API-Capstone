@@ -3,7 +3,7 @@
 let map, heatmapLatLngsArr, heatmap, userPosition, userLocationLatLngObject, marker, youAreHereLabel, aggregateSearchResultsArr = [],
   uniqueSearchResultsArr = [];
 
-// Initial lat/lng for pageload (if app can't geolocate user)
+// Initial lat/lng for pageload (used to demonstrate search, if app can't geolocate user)
 let defaultLatLng = {
   lat: 51.5032,
   lng: -0.1123
@@ -12,7 +12,7 @@ let defaultLatLng = {
 // Initiates listeners - called on pageload
 function startListeningForUserInput() {
   listenForStartClick();
-  listenForGoClick();
+  listenForSearchClick();
   listenForHelpFocus()
   listenForReturnOnSearch();
   listenForToggleShowResultsButtonClick();
@@ -44,60 +44,27 @@ function hideYouAreHereLabel() {
   }, 2000);
 }
 
-// Takes user input (location and place type) and
-// calls handleGoClick.
-function listenForGoClick() {
+function listenForSearchClick() {
   $('.js-go-button').on('click', function(event) {
     event.preventDefault();
-    // Will only act if user has typed into the search box.
+    // Will only function if user has typed something into the search box.
     initiateSearchFunctions();
   });
 }
 
-// Allows help to display/hide when in/out focus
-function listenForHelpFocus() {
-  // for mouse users
-  $('.help').on('mouseenter', function() {
-    displayHelp();
-  }).on('mouseleave', function() {
-    hideHelp();
-  });
-
-  // for keyboard users
-  $('.help').focus(function() {
-    displayHelp();
-  }).focusout(function() {
-    hideHelp()
-  });
-
-}
-
-// 
-function displayHelp() {
-  let html = `
-  <h3>Help</h3>
-  <p>Find the best places to explore. To search, just click on
-    the map or type a location into the search bar.  Be sure to
-    pick your interests from the drop-down menu.  
-  </p>
-  `
-  $('.help-text').html(html).show();
-}
-
-function hideHelp() {
-  $('.help-text').html('').hide();
-}
-
-// As above, but listens for user pressing return key
-// on a location search.
 function listenForReturnOnSearch() {
   $('.js-search-box').keydown(function(event) {
     if (event.which == 13) {
       event.preventDefault()
+    // Will only function if user has typed something into the search box.
       initiateSearchFunctions();
     }
   })
 }
+
+// Note: 
+// Starts the chain of functions involved in searching 
+// and displaying a heatmap. Continues until createHeatmap().
 
 // Takes the location search term from the top of the UI 
 // and uses it to perform a search request.
@@ -105,15 +72,9 @@ function initiateSearchFunctions() {
   // Only runs if the inputs are filled out.
   if ($('.js-search-box').val()) {
     let locationString = $('.js-search-box').val();
-    handleUserSearchRequest(locationString);
+    let geocodeUrl = makeGeocodeUrl(locationString);
+    getAndCheckLocationJson(geocodeUrl);
   }
-}
-
-// Called when user clicks 'search' or presses 'enter' 
-// on search input
-function handleUserSearchRequest(locationString) {
-  let geocodeUrl = makeGeocodeUrl(locationString);
-  getAndCheckLocationJson(geocodeUrl);
 }
 
 // Makes the Url used in getAndCheckLocationJson().
@@ -142,103 +103,15 @@ function checkProposedLocationIsValid(locationJson) {
     // Center the map
     goToLocation(locationObject);
     checkNeedForRecentering();
-    //
     makeNewPlacesRequest(locationObject);
   }
 }
 
-// Presents error to user when location isn't in database.
-function displayNoSuchLocationErrorMessage() {
-  let noSuchLocationErrorMessage =
-    `<i class="js-no-such-location-error-message-close 
-             no-such-location-error-message-close 
-             material-icons">close</i>
-  <i class="material-icons">mood_bad</i>
-  <br>Sorry, that location isn't available... Why not try another? 
-  `;
-  $('.js-no-such-location-error-message').html(noSuchLocationErrorMessage).removeAttr('hidden');
-}
-
-// Listener for user clicking 'close' to remove error message.
-function listenForUserClickOnCloseNoSuchLocationErrorMessage() {
-  $('.js-no-such-location-error-message')
-    .on('click', '.js-no-such-location-error-message-close', function(event) {
-      removeNoSuchLocationErrorMessage();
-    });
-}
-
-
-
-// When the user submits a valid location or clicks 'close'.
-function removeNoSuchLocationErrorMessage() {
-  $('.js-no-such-location-error-message').html('').hide();
-}
-
-// Centers map on new location.
-function goToLocation(locationObject) {
-  // In case the 'no such location' error message is currently displayed
-  removeNoSuchLocationErrorMessage();
-  if (locationObject.geometry.viewport) {
-    // If available, consider the location's size to help set zoom level...
-    setMapViewportUsingBounds(locationObject)
-  } else {
-    // ... Else, just center viewport on the location. 
-    locationLatLng = makeLatLngObject(locationObject)
-    centerMapOnLocation(locationLatLng);
-  }
-}
-
-// Uses location's bounds to set appropriate zoom level.
-function setMapViewportUsingBounds(locationObject) {
-  let bounds = new google.maps.LatLngBounds();
-  // Use location's northwest and southeast extremes to set zoom: 
-  bounds.extend(locationObject.geometry.viewport.northeast);
-  bounds.extend(locationObject.geometry.viewport.southwest);
-  map.fitBounds(bounds);
-}
-
-// Returns lat/lng in format that can be used with Google Maps.
-// There are several ways that Google's APIs present lat/lng data. 
-function makeLatLngObject(source) {
-  let latLngObject;
-  if (source.geometry && typeof source.geometry.location.lat == 'function') {
-    latLngObject = {
-      lat: source.geometry.location.lat(),
-      lng: source.geometry.location.lng()
-    }
-  } else if (source.geometry) {
-    latLngObject = {
-      lat: source.geometry.location.lat,
-      lng: source.geometry.location.lng
-    }
-  } else if (source.coords) {
-    latLngObject = {
-      lat: source.coords.latitude,
-      lng: source.coords.longitude
-    }
-  } else if (typeof source.lat == 'function') {
-    latLngObject = {
-      lat: source.lat(),
-      lng: source.lng()
-    }
-  } else {
-    latLngObject = {
-      lat: source.lat,
-      lng: source.lng
-    }
-  } 
-  return latLngObject
-}
-
-// Usually called on the results of makeLatLngObject (see above).
-function centerMapOnLocation(latLngObject) {
-  let resultsArea = document.getElementById('js-results')
-  map.setCenter(latLngObject);
-}
-
 // Pulls together data for request, then makes request.
 function makeNewPlacesRequest(locationObject) {
-  // Pulling together request data: 
+  removeNoSuchLocationErrorMessage();
+
+  // Data for request: 
   let locationLatLng, radius, placeCategory;
   locationLatLng = makeLatLngObject(locationObject);
   radius = getviewportRadius();
@@ -264,7 +137,7 @@ function getCategory() {
     // For collections of categories - eg 'culture'
     placeCategory = $(placeCategorySelection).attr('value').split(',');
   } else {
-    // for individual categories - eg 'art_galleries'
+    // for individual categories - eg 'cafe'
     placeCategory = $(placeCategorySelection).attr('value');
   }
   return placeCategory;
@@ -306,71 +179,62 @@ function getRadiusForPlacesRequest() {
   return dis;
 }
 
-// Requests places and makes a heatmapArr for createHeatmap.
-// Might change to 'handleRequestForPlacesJson' and use it to direct to different functions for
-// collections (culture) and individual categories (church)
+// Directs to different functions for collections (culture) and individual categories (church)
 function requestPlacesJson(locationLatLng, placeCategory, radius, collection) {
   let service = new google.maps.places.PlacesService(map);
-
-  // For collections of category - eg 'culture' etc
   if (collection) {
-    for (let subtype in placeCategory) {
-      // define request for each subtype
-      let request = prepareRequest(locationLatLng, placeCategory[subtype], radius);
-      // Make request to Places library!
-      service.nearbySearch(request, function(results) {
-        if (results.length > 0) {
-          combineResults(results, aggregateSearchResultsArr);
-        }
-      });
-
-    }
-
-    // Wait for json request to be fulfilled...
-    setTimeout(function() {
-      // Put unique results in uniqueSearchResultsArr
-      uniqueSearchResultsArr = filterResults(aggregateSearchResultsArr);
-      alphabeticallyOrderResults(uniqueSearchResultsArr)
-      showResultsInSidebar(uniqueSearchResultsArr);
-      // Build the heatmap with uniqueSearchResultsArr
-      heatmapLatLngsArr = makeLatLngsFromPlacesJson(uniqueSearchResultsArr);
-      createHeatmap(heatmapLatLngsArr);
-    }, 2000)
-
-
-    // For individual categories - eg 'art_gallery' etc
+    getJsonForCollectionOfCategories(locationLatLng, placeCategory, radius, service);
   } else {
-    let request = {
-      location: locationLatLng,
-      radius: radius,
-      type: placeCategory
-    }
+    getJsonForIndividualCategory(locationLatLng, placeCategory, radius, service);
+  }
+}
+
+// For collections of category - eg 'Culture' etc
+function getJsonForCollectionOfCategories(locationLatLng, placeCategory, radius, service) {
+  for (let subtype in placeCategory) {
+    // define request for each subtype
+    let request = prepareRequest(locationLatLng, placeCategory[subtype], radius);
+    // Make request to Places library!
     service.nearbySearch(request, function(results) {
-      alphabeticallyOrderResults(results)
-      showResultsInSidebar(results);
-      heatmapLatLngsArr = makeLatLngsFromPlacesJson(results); 
-      createHeatmap(heatmapLatLngsArr);
-      uniqueSearchResultsArr = results;
-    })
+      if (results && results.length > 0) {
+        // Combine results and remove duplicates
+        combineResults(results, aggregateSearchResultsArr);
+        uniqueSearchResultsArr = filterResults(aggregateSearchResultsArr);
+      }
+    });
   }
-}
+  // Wait for all json requests to be fulfilled - can be 5+ requests depending on category.
+  setTimeout(function() {
+    presentSearchResults(uniqueSearchResultsArr)
+  }, 500)  
+} 
 
-// Used to aggregate results into aggregateSearchResultsArr
-function combineResults(results, arr) {
-  
-  for (let result in results) {
-    arr.push(results[result]);
-  }
-  return arr;
-}
-
-function prepareRequest(locationLatLng, placeCategory, radius) {  
+// For individual categories - eg 'art_gallery' etc
+function getJsonForIndividualCategory(locationLatLng, placeCategory, radius, service) {
   let request = {
     location: locationLatLng,
     radius: radius,
     type: placeCategory
   }
-  return request;
+  service.nearbySearch(request, function(results) {
+    presentSearchResults(results);
+    uniqueSearchResultsArr = results;
+  })
+}
+
+function presentSearchResults(results) {
+  alphabeticallyOrderResults(results)
+  showResultsInSidebar(results);
+  heatmapLatLngsArr = makeLatLngsFromPlacesJson(results); 
+  createHeatmap(heatmapLatLngsArr);
+}
+
+// Used to aggregate results into aggregateSearchResultsArr
+function combineResults(results, arr) {
+  for (let result in results) {
+    arr.push(results[result]);
+  }
+  return arr;
 }
 
 // Returns an array of unique search results
@@ -386,6 +250,16 @@ function filterResults(array) {
   return uniqueSearchResultsArr;
 }
 
+
+function prepareRequest(locationLatLng, placeCategory, radius) {  
+  let request = {
+    location: locationLatLng,
+    radius: radius,
+    type: placeCategory
+  }
+  return request;
+}
+
 function alphabeticallyOrderResults(array) {
   array.sort(function(a, b) {
     let textA = a.name.toUpperCase();
@@ -394,23 +268,12 @@ function alphabeticallyOrderResults(array) {
   });
 }
 
-// Filters out duplicate objects from an array
-function checkMembership(uniqueSearchResultsArr, value) {
-  
-  for (let item in uniqueSearchResultsArr) {
-    if (uniqueSearchResultsArr[item].id == value) {
-      return true;
-    }
-    return false;
-  }
-}
-
 // Starts the chain of functions to make places appear in sidebar.
 function showResultsInSidebar(results) {
   
   let resultsHtml;
   if (results.length > 0) {
-    resultsHtml = prepareResultsHtmlFromResults(results);
+    resultsHtml = prepareResultsSidebarHtmlFromResults(results);
   } else {
     resultsHtml = `
     <div class="results-initial-margin">
@@ -421,37 +284,24 @@ function showResultsInSidebar(results) {
               </div>
               <hr>`
   }
-  loadResultsHtml(resultsHtml);
-  revealResultsArea();
+  loadResultsHtmlInSidebar(resultsHtml);
+  revealResultsSidebar();
 }
 
 // Reveals sidebar
-function revealResultsArea() {
+function revealResultsSidebar() {
   
   $('.results').show();
   unhideResultsAndDisplayTheHideButton();  
 }
 
-// Checks need to recent map on webpage for UX
-function checkNeedForRecentering() {
-  
-  let resultsArea = document.getElementById('js-results');
-  //if (!resultsArea.hasAttribute('hidden') && $(window).width() > 750) {
-  if ($(window).width() > 750) {
-    let visibleMapWidth = $(window).width() - 350;
-    let visibleMapHeight = $(window).height() - 120;
-    panMap(-visibleMapWidth / 7, -visibleMapHeight / 6);
-  } 
-}
-
 // Allows manual recenter of map
 function panMap(x, y) {
-  
   map.panBy(x, y);
 }
 
 // Creates dynamic html for list of locations in sidebar.
-function prepareResultsHtmlFromResults(results) {
+function prepareResultsSidebarHtmlFromResults(results) {
   
   let attractionName, attractionLocation, attractionPhoto, attractionId;
   let html = `<div class="results-initial-margin">
@@ -489,8 +339,7 @@ function makeAttractionPhotoHtml(thisAttraction) {
 }
 
 // Load the html
-function loadResultsHtml(resultsHtml) {
-  
+function loadResultsHtmlInSidebar(resultsHtml) {
   $('.results-area').html(resultsHtml);
 }
 
@@ -512,7 +361,6 @@ function listenForUserClickOnResults() {
     }
 
     // Center map on place clicked
-    
     thisAttractionLatLngObject = makeLatLngObject(thisAttractionObject);
     centerMapOnLocation(thisAttractionLatLngObject);
 
@@ -521,14 +369,13 @@ function listenForUserClickOnResults() {
     marker = new google.maps.Marker({
       position: thisAttractionLatLngObject,
       map: map,
-      title: name //--------------------------------------------------------------------------------
+      title: name 
     });
   });
 }
 
 // Handles clicks to button that shows/hides sidepane
 function listenForToggleShowResultsButtonClick() {
-  
   $('.js-toggle-show-results-button').on('click', function(event) {
     event.preventDefault();
     if ($('.js-toggle-show-results-button').hasClass('hide-button')) {
@@ -559,11 +406,9 @@ function unhideResultsAndDisplayTheHideButton() {
   $('.results-background').show()
 }
 
-// creates lat/lngs object in the format accepted by the API.
+// Creates lat/lngs object in the format needed for Google's heatmap generator.
 function makeLatLngsFromPlacesJson(json) {
-  
-  let heatmapLatLngsArr = [],
-    latLngObject;
+  let heatmapLatLngsArr = [], latLngObject;
   for (let item in json) {
     latLngObject = makeLatLngObject(json[item]);
     heatmapLatLngsArr.push(new google.maps.LatLng(latLngObject.lat, latLngObject.lng));
@@ -571,9 +416,41 @@ function makeLatLngsFromPlacesJson(json) {
   return heatmapLatLngsArr;
 }
 
-// Final function in the chain... Makes heatmap!
-// Note that we make a single heatmap layer
-// and reuse it for subsequent searches.
+// Returns lat/lng in format that can be used with Google Maps.
+// There are several ways that Google's APIs present lat/lng data. 
+function makeLatLngObject(source) {
+  let latLngObject;
+  if (source.geometry && typeof source.geometry.location.lat == 'function') {
+    latLngObject = {
+      lat: source.geometry.location.lat(),
+      lng: source.geometry.location.lng()
+    }
+  } else if (source.geometry) {
+    latLngObject = {
+      lat: source.geometry.location.lat,
+      lng: source.geometry.location.lng
+    }
+  } else if (source.coords) {
+    latLngObject = {
+      lat: source.coords.latitude,
+      lng: source.coords.longitude
+    }
+  } else if (typeof source.lat == 'function') {
+    latLngObject = {
+      lat: source.lat(),
+      lng: source.lng()
+    }
+  } else {
+    latLngObject = {
+      lat: source.lat,
+      lng: source.lng
+    }
+  } 
+  return latLngObject
+}
+
+// Final function in the chain started by initiateSearchFunctions()...
+// Makes heatmap!
 function createHeatmap(heatmapLatLngsArr) {
   
   if (!heatmap) {
@@ -591,14 +468,12 @@ function createHeatmap(heatmapLatLngsArr) {
     heatmap.data = newData;
     // In case the heatmap is currently hidden:
     heatmap.setMap(map);
-
   }
 }
 
 // Called when Google API finishes loading.  Kickstarts the page with
 // initial map/heatmap and calls prepareAutocomplete().  
 function initMap() {
-  
   // Create Google Map centered on defaultLatLng. 
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 15,
@@ -608,15 +483,12 @@ function initMap() {
       position: google.maps.ControlPosition.BOTTOM_CENTER,
     }
   });
-
-
   // To demonstrate utility to user on pageload:
   performInitialHeatmapSearch();
   // Add autocomplete functionality to searchbar.
   prepareAutocomplete();
   // Add 'search around a clicked spot on the map' functionality 
   prepareSearchOnClickToMap();
-
 }
 
 // Either perform initial search on user's location, or use
@@ -651,16 +523,6 @@ function prepareAutocomplete() {
   autocomplete.addListener('place_changed', function() {
     // In case the 'no such location' error message is currently displayed
     removeNoSuchLocationErrorMessage();
-    let place = autocomplete.getPlace();
-    let placeLatLngObj = makeLatLngObject(place);
-    if (place.geometry.viewport) {
-      // uses viewport coords (if place object has them) to bound map.
-      map.fitBounds(place.geometry.viewport);
-    } else {
-      // else just center on the location
-      centerMapOnLocation(placeLatLngObj);
-    }
-    makeNewPlacesRequest(placeLatLngObj);
   });
 }
 
@@ -712,6 +574,105 @@ function showUserLocation() {
   });
 }
 
+// Allows help to display/hide when in/out focus
+function listenForHelpFocus() {
+  // for mouse users
+  $('.help').on('mouseenter', function() {
+    displayHelp();
+  }).on('mouseleave', function() {
+    hideHelp();
+  });
+
+  // for keyboard users
+  $('.help').focus(function() {
+    displayHelp();
+  }).focusout(function() {
+    hideHelp()
+  });
+}
+
+function displayHelp() {
+  let html = `
+  <h3>Help</h3>
+  <p>Find the best places to explore. To search, just click on
+    the map or type a location into the search bar.  Be sure to
+    pick your interests from the drop-down menu.  
+  </p>
+  `
+  $('.help-text').html(html).show();
+}
+
+function hideHelp() {
+  $('.help-text').html('').hide();
+}
+
+// Checks need to recent map on webpage for UX
+function checkNeedForRecentering() {
+  
+  let resultsArea = document.getElementById('js-results');
+  //if (!resultsArea.hasAttribute('hidden') && $(window).width() > 750) {
+  if ($(window).width() > 750) {
+    let visibleMapWidth = $(window).width() - 350;
+    let visibleMapHeight = $(window).height() - 120;
+    panMap(-visibleMapWidth / 7, -visibleMapHeight / 6);
+  } 
+}
+
+// Presents error to user when location isn't in database.
+function displayNoSuchLocationErrorMessage() {
+  let html =
+    `<i class="js-no-such-location-error-message-close 
+             no-such-location-error-message-close 
+             material-icons">close</i>
+  <i class="material-icons">mood_bad</i>
+  <br>Sorry, that location isn't available... Why not try another? 
+  `;
+  $('.js-no-such-location-error-message').show().html(html);
+}
+
+// Listener for user clicking 'close' to remove error message.
+function listenForUserClickOnCloseNoSuchLocationErrorMessage() {
+  $('.js-no-such-location-error-message')
+    .on('click', '.js-no-such-location-error-message-close', function(event) {
+      removeNoSuchLocationErrorMessage();
+    });
+}
+
+// When the user submits a valid location or clicks 'close'.
+function removeNoSuchLocationErrorMessage() {
+  $('.js-no-such-location-error-message').html('').hide();
+}
+
+// Centers map on new location.
+function goToLocation(locationObject) {
+  // In case the 'no such location' error message is currently displayed
+  removeNoSuchLocationErrorMessage();
+  if (locationObject.geometry.viewport) {
+    // If available, consider the location's size to help set zoom level...
+    setMapViewportUsingBounds(locationObject)
+  } else {
+    // ... Else, just center viewport on the location. 
+    locationLatLng = makeLatLngObject(locationObject)
+    centerMapOnLocation(locationLatLng);
+  }
+}
+
+// Uses location's bounds to set appropriate zoom level.
+function setMapViewportUsingBounds(locationObject) {
+  let bounds = new google.maps.LatLngBounds();
+  // Use location's northwest and southeast extremes to set zoom: 
+  bounds.extend(locationObject.geometry.viewport.northeast);
+  bounds.extend(locationObject.geometry.viewport.southwest);
+  map.fitBounds(bounds);
+}
+
+// Usually called on the results of makeLatLngObject (see above).
+function centerMapOnLocation(latLngObject) {
+  let resultsArea = document.getElementById('js-results')
+  if (latLngObject.lat) {
+    map.setCenter(latLngObject);
+  }
+}
 
 
 $('.js-search-box').focus();

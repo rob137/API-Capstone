@@ -1,6 +1,6 @@
 # Warmer - find the best areas to explore, fast, using heatmap search.
 
-First capstone project on Thinkful's Flex Web Development Course. Can be viewed <a href="https://rob137.github.io/API-Capstone/index.html">here</a>. 
+First capstone project on Thinkful's Flex Web Development Course. Can be viewed <a href="https://rob137.github.io/Warmer/">here</a>. 
 
 <img src="https://preview.ibb.co/givhWb/london_demo.png" alt="Screenshot of app">
 
