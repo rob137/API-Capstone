@@ -544,15 +544,16 @@ function listenForUserClickOnResults() {
     }
 
     // Center map on place clicked
-    console.log(thisAttractionObject);
+    
     thisAttractionLatLngObject = makeLatLngObject(thisAttractionObject);
     centerMapOnLocation(thisAttractionLatLngObject);
 
+    let name = thisAttractionObject.name;
     // Put marker on place!
     marker = new google.maps.Marker({
       position: thisAttractionLatLngObject,
       map: map,
-      title: 'Hello World!'
+      title: name //--------------------------------------------------------------------------------
     });
   });
 }

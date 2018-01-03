@@ -29,21 +29,14 @@
 					<form >
 						<section class="search-params-boxes">
 							<select aria-live="polite" class="select-place-type js-select-place-type">
-								<option class="option-place-type js-option-place-type collection" value="city_hall,church,synagogue,mosque,hindu_temple,library,museum,art_gallery">Cultural Attractions</option>
-								<option class="option-place-type js-option-place-type" value="art_gallery">Art Galleries</option>
-								<option class="option-place-type js-option-place-type" value="museum">Museums</option>
-								<option class="option-place-type js-option-place-type collection" value="movie_theater,bowling_alley,aquarium,park">Entertainment</option>
-								<option class="option-place-type js-option-place-type collection" value="meal_takeaway,bakery,restaurant">Food (all)</option>
-								<option class="option-place-type js-option-place-type" value="restaurant">Restaurants</option>
-								<option class="option-place-type js-option-place-type" value="cafe">Cafes</option>
-								<option class="option-place-type js-option-place-type" value="department_store">Department Stores</option>
-								<option class="option-place-type js-option-place-type" value="store">Shops (all)</option>
-								<option class="option-place-type js-option-place-type collection" value="restaurant,bar,night_club,casino">Nightlife</option>
-								<option class="option-place-type js-option-place-type" value="bar" selected='selected'>Bars</option>
-								<option class="option-place-type js-option-place-type" value="night_club">Night Clubs</option>
-								<option class="option-place-type js-option-place-type" value="casino">Casinos</option>
+								<option class="option-place-type js-option-place-type collection" value="bar,night_club,casino" selected="selected">Nightlife</option>
+								<option class="option-place-type js-option-place-type collection" value="city_hall,church,synagogue,mosque,hindu_temple,library,museum,art_gallery">Culture</option>
+								<option class="option-place-type js-option-place-type collection" value="movie_theater,bowling_alley,aquarium,park,gym,stadium,spa">Leisure</option>
+								<option class="option-place-type js-option-place-type collection" value="meal_takeaway,bakery,restaurant">Food</option>
+								<option class="option-place-type js-option-place-type" value="cafe">Coffee</option>
+								<option class="option-place-type js-option-place-type collection" value="department_store,shopping_mall">Shopping</option>
 							</select>
-							<input type="search" aria-live="assertive" name="search-box" class="js-search-box search-box" id="js-search-box" placeholder="Enter a district or click on the map" required><p class="js-no-such-location-error-message no-such-location-error-message" title="Hide the sidebar" hidden></p>
+							<input type="search" aria-live="assertive" name="search-box" class="js-search-box search-box" id="js-search-box" placeholder="Click on the map or enter a district" required><p class="js-no-such-location-error-message no-such-location-error-message" title="Hide the sidebar" hidden></p>
 						</section>
 						<button class="search-button search-icon js-search-icon go-button js-go-button">
 						<i class="material-icons" alt="Click here to search" title="Click here to search">search</i></button>
