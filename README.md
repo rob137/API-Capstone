@@ -1,8 +1,8 @@
-# Warmer - find the center of things quickly when exploring a city.
+# Warmer - find the best areas to explore, fast, using heatmap search.
 
 First capstone project on Thinkful's Flex Web Development Course. Can be viewed <a href="https://rob137.github.io/API-Capstone/index.html">here</a>. 
 
-<a href="">Screenshot</a>
+<img src="https://preview.ibb.co/cBzRrb/london_demo.png" alt="Screenshot of app">
 
 Highlights clusters of attractions like restaurants, museums, bars etc.  Uses the Google Maps API and libraries (Places, Geometry and Autocomplete). 
 
@@ -13,6 +13,7 @@ Highlights clusters of attractions like restaurants, museums, bars etc.  Uses th
 <a href="https://gist.github.com/rob137/a4c055ea43a12b5627882e612af1a8a7">Initial Wireframes</a>
 
 The app was designed to work on mobile as well as tablet and desktop from the outset. 
+
 
 After a landing page giving a brief summary of the App, a searchpage appears with a map. Users can either enter an address to a search bar or click-to-search on the map.  On hitting 'search', the user is presented with heat 'blobs' on the map, showing where attractions are clustered together.  Attraction search categories ('Cultural', 'Nightlife') can be selected from a dropdown menu. The user is also presented with a sidepane which allows them to locate individual results on the map.
 
