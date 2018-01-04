@@ -355,7 +355,7 @@ button:focus {
 		width: 75% !important;
 	}
 
-	.toggle-show-results-button {
+	.hide-button {
 		left: 268px !important;
 	}
 }
