@@ -114,24 +114,24 @@ h1 {
 
 .main-decoration-hr1 {
 	margin-top: -24px;
-	width: 25%;
+	width: 200px;
 	border-color: #e5e5e5;
 }
 
 .main-decoration-hr2 {
-	width: 30%;
+	width: 220px;
 	margin-top: -5px;
 	border-color: #d6d6d6;
 }
 
 .main-decoration-hr3 {
-	width: 35%;
+	width: 240px;
 	margin-top: -5px;
 	border-color: #cccccc;
 }
 
 .main-decoration-hr4 {
-	width: 40%;
+	width: 260px;
 	margin-top: -5px;
 	border-color: #c1c1c1;
 }
@@ -446,22 +446,22 @@ button:focus {
 	}
 
 	.main-decoration-hr1 {
-		width: 300px;
+		width: 220px;
 		margin-top: -24px;
 	}
 
 	.main-decoration-hr2 {
-		width: 340px;
+		width: 250px;
 		margin-top: -5px;
 	}
 	
 	.main-decoration-hr3 {
-		width: 380px;
+		width: 280px;
 		margin-top: -5px;
 	}
 	
 	.main-decoration-hr4 {
-		width: 420px;
+		width: 310px;
 		margin-top: -5px;
 	}
 } 
