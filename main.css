@@ -410,21 +410,21 @@ button:focus {
 		top: 92px;
 	}
 
-.main-decoration-hr1 {
-	width: 170px;
-}
-
-.main-decoration-hr2 {
-	width: 180px;
-}
-
-.main-decoration-hr3 {
-	width: 190px;
-}
-
-.main-decoration-hr4 {
-	width: 200px;
-}
+	.main-decoration-hr1 {
+		width: 170px;
+	}
+	
+	.main-decoration-hr2 {
+		width: 180px;
+	}
+	
+	.main-decoration-hr3 {
+		width: 190px;
+	}
+	
+	.main-decoration-hr4 {
+		width: 200px;
+	}
 
 }
 
