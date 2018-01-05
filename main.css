@@ -430,19 +430,19 @@ button:focus {
 
 @media (min-width: 1000px) {
 	.opening-decoration-hr1 {
-		width: 70%;
+		width: 500px;
 	}
 
 	.opening-decoration-hr2 {
-		width: 76%;
+		width: 540px;
 	}
 	
 	.opening-decoration-hr3 {
-		width: 82%;
+		width: 580px;
 	}
 	
 	.opening-decoration-hr4 {
-		width: 88%;
+		width: 620px;
 	}
 
 	.main-decoration-hr1 {
