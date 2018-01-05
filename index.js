@@ -480,9 +480,12 @@ function initMap() {
     center: defaultLatLng,
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-      position: google.maps.ControlPosition.BOTTOM_CENTER,
+      position: google.maps.ControlPosition.BOTTOM_CENTER
     }
   });
+
+  // deactivates streetview
+  map.setOptions({streetViewControl: false})
   // To demonstrate utility to user on pageload:
   performInitialHeatmapSearch();
   // Add autocomplete functionality to searchbar.
