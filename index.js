@@ -13,7 +13,7 @@ let defaultLatLng = {
 function startListeningForUserInput() {
   listenForStartClick();
   listenForSearchClick();
-  listenForHelpFocus()
+  listenForHelpFocus();
   listenForReturnOnSearch();
   listenForToggleShowResultsButtonClick();
   listenForUserClickOnResults();
@@ -55,11 +55,11 @@ function listenForSearchClick() {
 function listenForReturnOnSearch() {
   $('.js-search-box').keydown(function(event) {
     if (event.which == 13) {
-      event.preventDefault()
+      event.preventDefault();
     // Will only function if user has typed something into the search box.
       initiateSearchFunctions();
     }
-  })
+  });
 }
 
 // Note: 
@@ -89,8 +89,7 @@ function getAndCheckLocationJson(geocodeUrl) {
   $.getJSON(geocodeUrl, function(json) {
     let locationJson = json;
     checkProposedLocationIsValid(locationJson);
-  })
-
+  });
 }
 // Checks that the location exists on Google's API.
 // If so, continues the chain of functions.
@@ -131,7 +130,7 @@ function makeNewPlacesRequest(locationObject) {
 
 // Retrieves category from DOM
 function getCategory() {
-  $('.js-select-place-type :selected')
+  $('.js-select-place-type :selected');
   let placeCategory, placeCategorySelection = $('.js-select-place-type :selected');
   if ($(placeCategorySelection).hasClass('collection')) {
     // For collections of categories - eg 'culture'
@@ -149,11 +148,11 @@ function getviewportRadius() {
   let northEastBoundLatLngObject = {
     lat: map.getBounds().getNorthEast().lat,
     lng: map.getBounds().getNorthEast().lng
-  }
+  };
   let southWestBoundLatLngObject = {
     lat: map.getBounds().getSouthWest().lat,
     lng: map.getBounds().getSouthWest().lng
-  }
+  };
   let radius = google.maps.geometry.spherical
     .computeDistanceBetween(northEastBoundLatLngObject, southWestBoundLatLngObject) / 4;
   return radius;
@@ -205,8 +204,8 @@ function getJsonForCollectionOfCategories(locationLatLng, placeCategory, radius,
   }
   // Wait for all json requests to be fulfilled - can be 5+ requests depending on category.
   setTimeout(function() {
-    presentSearchResults(uniqueSearchResultsArr)
-  }, 1500)  
+    presentSearchResults(uniqueSearchResultsArr);
+  }, 1500);
 } 
 
 // For individual categories - eg 'art_gallery' etc
@@ -215,15 +214,15 @@ function getJsonForIndividualCategory(locationLatLng, placeCategory, radius, ser
     location: locationLatLng,
     radius: radius,
     type: placeCategory
-  }
+  };
   service.nearbySearch(request, function(results) {
     presentSearchResults(results);
     uniqueSearchResultsArr = results;
-  })
+  });
 }
 
 function presentSearchResults(results) {
-  alphabeticallyOrderResults(results)
+  alphabeticallyOrderResults(results);
   showResultsInSidebar(results);
   heatmapLatLngsArr = makeLatLngsFromPlacesJson(results); 
   createHeatmap(heatmapLatLngsArr);
@@ -242,8 +241,8 @@ function filterResults(array) {
   let uniqueSearchResultsArr = [];
   array.forEach(function(item) {
     if (uniqueSearchResultsArr.filter(function(n) {
-        return n.id === item.id
-      }).length == 0) {
+        return n.id === item.id;
+      }).length === 0) {
       uniqueSearchResultsArr.push(item);
     }
   });
@@ -256,7 +255,7 @@ function prepareRequest(locationLatLng, placeCategory, radius) {
     location: locationLatLng,
     radius: radius,
     type: placeCategory
-  }
+  };
   return request;
 }
 
@@ -282,7 +281,7 @@ function showResultsInSidebar(results) {
                 <p>Sorry, no results found!</p>
                 <br>
               </div>
-              <hr>`
+              <hr>`;
   }
   loadResultsHtmlInSidebar(resultsHtml);
   revealResultsSidebar();
@@ -321,7 +320,7 @@ function prepareResultsSidebarHtmlFromResults(results) {
               <p>${attractionLocation}</p>
             </section>
             <hr>
-            `
+            `;
   }
   return html;
 }
@@ -357,7 +356,7 @@ function listenForUserClickOnResults() {
 
     // Remove any markers already on map
     if (marker) {
-      marker.setMap(null)
+      marker.setMap(null);
     }
 
     // Center map on place clicked
@@ -383,7 +382,7 @@ function listenForToggleShowResultsButtonClick() {
     } else {
       unhideResultsAndDisplayTheHideButton();
     }
-  })
+  });
 }
 // see above 
 function hideResultsAndDisplayTheShowButton() {
@@ -393,7 +392,7 @@ function hideResultsAndDisplayTheShowButton() {
     .attr('title', 'Show the sidebar')
     .children(".material-icons").html('keyboard_arrow_right');
   $('.results-area').hide();
-  $('.results-background').hide()
+  $('.results-background').hide();
 }
 // see above 
 function unhideResultsAndDisplayTheHideButton() {
@@ -404,7 +403,9 @@ function unhideResultsAndDisplayTheHideButton() {
     .children(".material-icons").html('keyboard_arrow_left');
   $('.results-area').show();
   $('.results-background').show()
-}
+};
+
+
 
 // Creates lat/lngs object in the format needed for Google's heatmap generator.
 function makeLatLngsFromPlacesJson(json) {
@@ -424,27 +425,27 @@ function makeLatLngObject(source) {
     latLngObject = {
       lat: source.geometry.location.lat(),
       lng: source.geometry.location.lng()
-    }
+    };
   } else if (source.geometry) {
     latLngObject = {
       lat: source.geometry.location.lat,
       lng: source.geometry.location.lng
-    }
+    };
   } else if (source.coords) {
     latLngObject = {
       lat: source.coords.latitude,
       lng: source.coords.longitude
-    }
+    };
   } else if (typeof source.lat == 'function') {
     latLngObject = {
       lat: source.lat(),
       lng: source.lng()
-    }
+    };
   } else {
     latLngObject = {
       lat: source.lat,
       lng: source.lng
-    }
+    };
   } 
   return latLngObject
 }
@@ -485,7 +486,7 @@ function initMap() {
   });
 
   // deactivates streetview
-  map.setOptions({streetViewControl: false})
+  map.setOptions({streetViewControl: false});
   // To demonstrate utility to user on pageload:
   performInitialHeatmapSearch();
   // Add autocomplete functionality to searchbar.
@@ -517,7 +518,7 @@ function performInitialHeatmapSearch() {
 // Called when Google Maps API is finished loading (see initMap, below).
 function prepareAutocomplete() {
   
-  let input = document.getElementById('js-search-box')
+  let input = document.getElementById('js-search-box');
   let autocomplete = new google.maps.places.Autocomplete(input);
   // Bind the map's bounds (viewport) property to the autocomplete object,
   // so that the autocomplete requests use the current map bounds for the
@@ -534,7 +535,7 @@ function prepareSearchOnClickToMap() {
     let clickedLatLngObject = {
       lat: event.latLng.lat(),
       lng: event.latLng.lng()
-    }
+    };
     makeNewPlacesRequest(clickedLatLngObject);
   });
 }
@@ -562,7 +563,7 @@ function showUserLocation() {
   let backgroundShroud = document.getElementById('js-background-shroud');
   if (backgroundShroud.getAttribute('style') == 'display: none;') {
     // Hides the label after 2 seconds:
-    hideYouAreHereLabel()
+    hideYouAreHereLabel();
   }
   // Shows circle on user location:
   new google.maps.Circle({
@@ -590,7 +591,7 @@ function listenForHelpFocus() {
   $('.help').focus(function() {
     displayHelp();
   }).focusout(function() {
-    hideHelp()
+    hideHelp();
   });
 }
 
@@ -601,7 +602,7 @@ function displayHelp() {
     the map or type a location into the search bar.  Be sure to
     pick your interests from the drop-down menu.  
   </p>
-  `
+  `;
   $('.help-text').html(html).show();
 }
 
@@ -652,10 +653,10 @@ function goToLocation(locationObject) {
   removeNoSuchLocationErrorMessage();
   if (locationObject.geometry.viewport) {
     // If available, consider the location's size to help set zoom level...
-    setMapViewportUsingBounds(locationObject)
+    setMapViewportUsingBounds(locationObject);
   } else {
     // ... Else, just center viewport on the location. 
-    locationLatLng = makeLatLngObject(locationObject)
+    locationLatLng = makeLatLngObject(locationObject);
     centerMapOnLocation(locationLatLng);
   }
 }
@@ -671,7 +672,7 @@ function setMapViewportUsingBounds(locationObject) {
 
 // Usually called on the results of makeLatLngObject (see above).
 function centerMapOnLocation(latLngObject) {
-  let resultsArea = document.getElementById('js-results')
+  let resultsArea = document.getElementById('js-results');
   if (latLngObject.lat) {
     map.setCenter(latLngObject);
   }
